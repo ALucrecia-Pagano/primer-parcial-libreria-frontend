@@ -110,6 +110,7 @@ La página es un único `index.html` con 5 vistas (`<section class="vista">`): C
 ### Sidebar y menú móvil
 
 - El `nav#nav-principal` está dentro de `aside#sidebar`, con 5 enlaces, cada uno con ícono decorativo: Catálogo, Libros, Clientes, Ventas e Historial.
+- **Marca de la sidebar:** «Editorial CODEX» de la cabecera de la sidebar es solo texto (`p.sidebar__marca`): no es enlace, no recibe foco y no tiene efecto de hover. Al Catálogo se llega con el título «Editorial Codex», con «Inicio» de la barra superior y con el enlace Catálogo del menú. Hasta `pulido-final-etapa1` (15/10/2026) era un enlace a `#catalogo`; por eso el registro de C4 en «Verificación manual — C-02» menciona que el logo cerraba el menú.
 - **Escritorio (≥ 1024 px):** `#sidebar-colapsar` la reduce a íconos (`aria-expanded`, `aria-controls="sidebar"`). Colapsada, el texto de cada enlace sigue disponible para lectores de pantalla y el nombre aparece como tooltip en `:hover` y `:focus-visible`. El estado se guarda en `localStorage` (`libreria.preferencias.sidebar`, valores `colapsada` o `expandida`).
 - **Celular (< 1024 px):** la sidebar queda fuera de pantalla con `visibility: hidden` (sus enlaces no entran en el orden de Tab). `#menu-abrir` la abre y lleva el foco al primer enlace; `#menu-cerrar`, la tecla Escape, un clic en `#sidebar-velo` o activar un enlace la cierran. Con botón, Escape o clic en el velo el foco vuelve a `#menu-abrir`. Si la ventana pasa a escritorio con el menú abierto, se cierra sola.
 
@@ -471,6 +472,8 @@ La Etapa 1 entrega la maqueta navegable. Esta tabla dice, por vista, qué es sol
 
 Los avisos `aviso-maqueta-*` que quedan en Libros, Clientes, Ventas e Historial rotulan los controles que todavía no funcionan (el del Catálogo se quitó porque el buscador ya funciona).
 
+**Para C-10 (detalle de venta):** en el título de la tabla del detalle, el id de venta va dentro de `<span class="tabla__id">` (`white-space: nowrap`) para que a 320 px no se parta en el guion («V-» / «0001»). Al generar ese título con JS, crear el `span` con `createElement` y `textContent`.
+
 ## Decisiones de la Etapa 1
 
 Detalle en `knowledge-base/09_decisiones_y_supuestos.md`.
@@ -485,12 +488,12 @@ Detalle en `knowledge-base/09_decisiones_y_supuestos.md`.
 
 El campo "Buscar por título" del Catálogo filtra las tarjetas mientras se escribe.
 
-- **Regla:** `coincideTitulo(titulo, busqueda)` (función global de `js/app.js`, pura, sin DOM). Devuelve `true` si el título contiene la búsqueda sin distinguir mayúsculas ni espacios al principio o al final de la búsqueda. Búsqueda vacía o solo espacios devuelve `true` (se ven todos). Tolera `null` y `undefined`.
+- **Regla:** `coincideTitulo(titulo, busqueda)` (función global de `js/app.js`, pura, sin DOM). Devuelve `true` si el título contiene la búsqueda sin distinguir mayúsculas, tildes ni otros diacríticos, ni espacios al principio o al final de la búsqueda (`orbita` y `ÓRBITA` encuentran «Órbita lenta»). Ambos textos pasan por `normalizarTexto(texto)`, también pura: `normalize('NFD')`, quita las marcas `U+0300–U+036F` y pasa a minúsculas. Búsqueda vacía o solo espacios devuelve `true` (se ven todos). Tolera `null` y `undefined`.
 - **Eventos:** `input` y `change` sobre `#catalogo-busqueda`, y `submit` sobre `#form-busqueda` (Enter o clic en "Buscar"; `preventDefault()` y vuelve a filtrar, la página no se recarga). `registrarFormulariosMaqueta()` omite `#form-busqueda`, que ya no usa el handler de maqueta.
 - **Ocultar tarjetas:** `filtrarCatalogo()` asigna `hidden` a cada `.tarjeta` de `#catalogo-lista` según el texto de su `.tarjeta__titulo` (`textContent`).
 - **Mensajes:** `#catalogo-sin-resultados` se muestra solo si hay tarjetas y ninguna coincide. `#catalogo-vacio` no lo toca el filtro (lo gobernará C-04 cuando el catálogo salga del array).
 - **Zona de estado para lectores de pantalla:** `#catalogo-resultados` (`role="status"`, `aria-live="polite"`, clase `solo-lectores`, vacía al cargar). `textoResultadosCatalogo(visibles, total, busquedaVacia)` arma el texto: "Se muestran los 6 libros." (búsqueda vacía), "Se muestra 1 de 6 libros.", "Se muestran 4 de 6 libros." o "No se encontraron libros que coincidan con la búsqueda.". El texto no incluye lo que escribió el usuario y se escribe con `textContent`.
-- **Limitación conocida (acentos):** no se normalizan; "orbita" no encuentra "Órbita lenta". La regla (RN-CA-04) no lo pide.
+- **Tildes y ñ (desde `pulido-final-etapa1`, 15/10/2026):** antes los acentos no se normalizaban y `orbita` no encontraba «Órbita lenta»; ahora sí (RN-CA-04). Efecto aceptado: la ñ se descompone en «n» + virgulilla, así que `nino` encuentra «niño» (ningún título del catálogo de ejemplo tiene ñ). Los signos de puntuación y los espacios internos no se normalizan.
 - **Degradación sin JavaScript:** se ven las 6 tarjetas y ningún mensaje; enviar el buscador recarga `index.html?busqueda=...` con el catálogo completo, sin errores.
 - **Para C-04:** reemplazar el cuerpo de `filtrarCatalogo()` por un re-render desde `libros.filter(l => coincideTitulo(l.titulo, busqueda))`, conservando `coincideTitulo`, `textoResultadosCatalogo`, los listeners y `#catalogo-resultados`.
 
@@ -514,6 +517,7 @@ Registro para completar **a mano**, en el navegador (sin tests automáticos). Se
 | 6 | Escribir `xyz` | Ninguna tarjeta; mensaje "No se encontraron libros que coincidan con la búsqueda." | Ninguna tarjeta; aparece «No se encontraron libros que coincidan con la búsqueda.» | OK |
 | 7 | Con `xyz` escrito, presionar Enter y luego clic en "Buscar" | No recarga, la URL no cambia, el texto se conserva | No recarga, la URL no cambia y el texto se conserva | OK |
 | 8 | Con el lector de pantalla del sistema (Narrador/NVDA) o el panel de Accesibilidad de DevTools, repetir 2 y 6 | Se anuncia/lee "Se muestra 1 de 6 libros." y "No se encontraron libros…" en `#catalogo-resultados` | Ejecutado después (V10 de «Verificación manual — ajustes de auditoría»): `#catalogo-resultados` muestra «Se muestra 1 de 6 libros.» con `MAPA` y «No se encontraron libros que coincidan con la búsqueda.» con `xyz`. Se comprobó el texto de la zona de estado en DevTools, no el anuncio en voz de un lector de pantalla | OK |
+| 9 | Escribir `orbita` y luego reemplazar por `ÓRBITA` (paso agregado por `pulido-final-etapa1`) | Solo "Órbita lenta" en los dos casos | Ejecutado en P5 de «Verificación manual — pulido final» (15/10/2026): con `orbita` y con `ÓRBITA` se ve solo «Órbita lenta» | OK |
 
 ### Caso manual 8 — Teclado y anchos 320 / 1280 px
 
@@ -556,3 +560,31 @@ Columna «Cubre»: ítem pendiente de «Verificación manual — C-02» o de «C
 | V10 | Anuncio de `#catalogo-resultados` | Con Narrador/NVDA o el panel Accessibility, escribir `MAPA` y luego `xyz` en el buscador | Se anuncia/lee «Se muestra 1 de 6 libros.» y «No se encontraron libros que coincidan con la búsqueda.» | Caso 1, paso 8 | `#catalogo-resultados` muestra «Se muestra 1 de 6 libros.» con `MAPA` y «No se encontraron libros que coincidan con la búsqueda.» con `xyz` (se comprobó el texto de la zona de estado en DevTools, no el anuncio en voz de un lector de pantalla) | OK |
 | V11 | Recorrido con teclado a 320 y 1280 px, en ambos temas | Tab / Shift+Tab por la barra, el menú y las 5 vistas | Orden lógico y foco siempre visible, incluida la barra superior | — | Orden lógico y foco visible en todo, también en «Inicio» y en el botón de tema | OK |
 | V12 | Consola sin errores | Consola abierta durante V1–V11 | Ningún error | — | Ningún error en la consola | OK |
+
+## Verificación manual — pulido final
+
+Plantilla para completar **a mano**, en el navegador (sin tests automáticos), después del change `pulido-final-etapa1`. Cubre el título de tabla completo a 320 px, el filtro sin tildes, la marca de la sidebar como texto y los contenedores de tabla como `section`. Se anota el comportamiento real observado, aunque falle (RN-GL-03). Cada fila registra lo que se observó al ejecutarla.
+
+- **Fecha:** 15/10/2026 (fecha del registro; la ejecución no informó otra)
+- **Navegador (nombre y versión):** Microsoft Edge (versión no informada en esta verificación)
+- **Apertura:** `file://` (doble clic en `index.html`), con recarga forzada (Ctrl+F5)
+- **Ejecutó:** Amanda Pagano
+- **Resumen:** 15 de 15 ítems OK, 0 fallos. Amanda informó cada ítem como OK, sin detalle adicional; en «Resultado observado» se registra que se observó lo esperado.
+
+| ID | Qué se verifica | Cómo | Resultado esperado | Resultado observado | Estado |
+|---|---|---|---|---|---|
+| P1 | Historial a 320 px: título del detalle completo | DevTools en 320 px, vista Historial, sin desplazar la tabla del detalle | «Renglones de la venta V-0001» se lee completo dentro del recuadro (puede ocupar dos líneas) y «V-0001» no se parte en el guion | OK — se observó el resultado esperado | OK |
+| P2 | Celdas sin partir y título fijo al desplazar | A 320 px, en Historial, desplazar cada tabla hasta la última columna | «V-0001», la fecha y los importes siguen en una sola línea; el título de la tabla queda visible a la izquierda | OK — se observó el resultado esperado | OK |
+| P3 | Títulos de las otras tablas a 320 px | Libros, Clientes y Ventas a 320 px; en consola `document.documentElement.scrollWidth <= window.innerWidth` | Cada título se lee completo y la prueba da `true` en las 3 vistas | OK — se observó el resultado esperado | OK |
+| P4 | Títulos a 1280 px | Las 4 vistas con tabla a 1280 px | Los títulos se ven en una línea, como antes del change | OK — se observó el resultado esperado | OK |
+| P5 | Filtro sin tildes: `orbita` y `ÓRBITA` | Catálogo: escribir `orbita` y luego reemplazar por `ÓRBITA` | En los dos casos se ve solo «Órbita lenta» (caso manual 1, paso 9) | OK — se observó el resultado esperado | OK |
+| P6 | Filtro: tilde en la búsqueda o en el título | Escribir `jardineria` y luego `jardinería` | En los dos casos se ve solo «Manual de jardinería urbana» | OK — se observó el resultado esperado | OK |
+| P7 | El filtro sigue igual en lo demás | Repetir `MAPA`, `de`, `  faro  ` y `xyz` | Mismos resultados que los pasos 2, 3, 4 y 6 del caso manual 1 | OK — se observó el resultado esperado | OK |
+| P8 | Aspecto de la marca de la sidebar | 1280 px, sidebar expandida, en tema oscuro y claro | «Editorial CODEX» se ve igual que antes y al pasar el mouse no cambia | OK — se observó el resultado esperado | OK |
+| P9 | La marca no recibe foco | 1280 px: recorrer la sidebar con Tab | El foco pasa a los enlaces del menú sin detenerse en «Editorial CODEX» | OK — se observó el resultado esperado | OK |
+| P10 | Clic en la marca con el menú móvil abierto | 320 px: abrir el menú y hacer clic en «Editorial CODEX» | No navega ni cierra el menú; la consola no muestra errores | OK — se observó el resultado esperado | OK |
+| P11 | Caminos al Catálogo | Desde Clientes: activar el título «Editorial Codex»; volver a Clientes y activar «Inicio»; volver y activar «Catálogo» del menú | Las tres veces se muestra Catálogo | OK — se observó el resultado esperado | OK |
+| P12 | Contenedores de tabla como `section` | En consola: `document.querySelectorAll('[role="region"]').length` y `document.querySelectorAll('section.tabla-contenedor').length`; panel Accessibility sobre un contenedor | Da `0` y `5`; el contenedor se muestra con Role `region` y su nombre (ej. «Tabla de ventas registradas») | OK — se observó el resultado esperado | OK |
+| P13 | Tab y flechas en las tablas | 320 px: llegar con Tab a cada recuadro de tabla y usar ← / → | Contorno de foco visible y las flechas desplazan la tabla | OK — se observó el resultado esperado | OK |
+| P14 | Recorrido con teclado | Tab / Shift+Tab por la barra, el menú y las 5 vistas, a 320 y 1280 px, en tema oscuro y claro | Orden lógico y foco siempre visible | OK — se observó el resultado esperado | OK |
+| P15 | Consola sin errores | Consola abierta durante P1–P14 | Ningún error | OK — se observó el resultado esperado | OK |

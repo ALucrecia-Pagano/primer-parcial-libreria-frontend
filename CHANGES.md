@@ -464,6 +464,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - Documentar las decisiones de Etapa 2: libro repetido en venta (IN-02), JSON corrupto, regex de email, división de archivos JS
   - Declarar las imágenes que se usan y su procedencia (tapas CSS; solo el banner decorativo es una foto) y que no hay librerías, CDNs, npm ni `fetch`
   - Sin commits desde el change: cada integrante commitea al cerrar su parte
+  - Eliminar `docs/consigna-tpi.pdf` del repo al terminar el TPI (se mantiene mientras el equipo lo use)
 - **Dependencias**: `C-06, C-07, C-10`
 - **Governance**: BAJO
 - **Criterios de verificación manual**:

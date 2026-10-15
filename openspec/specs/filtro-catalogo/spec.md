@@ -5,8 +5,8 @@ Define cómo el operador filtra el catálogo de Editorial Codex por título: la 
 
 ## Requirements
 
-### Requirement: Regla de coincidencia por título
-Un libro SHALL coincidir con la búsqueda cuando su título, en minúsculas, contiene como subcadena el texto buscado sin espacios al inicio ni al final y en minúsculas. Una búsqueda vacía o solo con espacios SHALL coincidir con todos los libros. No se aplica otra normalización (acentos ni signos).
+### Requirement: Regla de coincidencia por título sin mayúsculas ni tildes
+Un libro SHALL coincidir con la búsqueda cuando su título contiene como subcadena el texto buscado, comparando ambos en minúsculas y sin tildes ni otros diacríticos, y quitando los espacios al inicio y al final de la búsqueda. Una búsqueda vacía o solo con espacios SHALL coincidir con todos los libros. No se aplica otra normalización (signos de puntuación ni espacios internos).
 
 #### Scenario: Sin distinguir mayúsculas
 - **WHEN** se busca `MAPA`
@@ -24,9 +24,13 @@ Un libro SHALL coincidir con la búsqueda cuando su título, en minúsculas, con
 - **WHEN** la búsqueda es `""` o `"   "`
 - **THEN** coinciden los 6 libros del catálogo
 
-#### Scenario: Acentos sin normalizar
-- **WHEN** se busca `orbita` (sin tilde)
-- **THEN** no coincide "Órbita lenta"; buscar `ÓRBITA` sí coincide
+#### Scenario: Sin distinguir tildes
+- **WHEN** se busca `orbita` y luego `ÓRBITA`
+- **THEN** en los dos casos coincide "Órbita lenta"
+
+#### Scenario: Tilde en la búsqueda y no en el título
+- **WHEN** se busca `jardineria` y luego `jardinería`
+- **THEN** en los dos casos coincide "Manual de jardinería urbana"
 
 ### Requirement: Regla reutilizable sin acceso al DOM
 La regla de coincidencia SHALL estar disponible como una función global pura `coincideTitulo(titulo, busqueda)` que devuelve un booleano, no lee ni modifica el DOM y no depende de las tarjetas, para que la Etapa 2 la aplique sobre el array de libros sin reescribir la regla.

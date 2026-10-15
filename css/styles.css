@@ -890,6 +890,8 @@ html.js .tema-alternar {
   border: 1px solid var(--color-borde);
   border-radius: var(--radio-m);
   box-shadow: var(--sombra-brillo-suave);
+  /* Contenedor de consulta: 100cqi = ancho visible, para que el título no se corte. */
+  container-type: inline-size;
 }
 
 /* Región con scroll enfocable por teclado (tabindex="0"): foco siempre visible. */
@@ -904,10 +906,22 @@ html.js .tema-alternar {
   border-collapse: collapse;
 }
 
+/* Título siempre completo: tan ancho como el área visible (se parte en líneas si hace
+   falta) y fijo a la izquierda mientras la tabla se desplaza. Las celdas siguen sin partirse. */
 .tabla__titulo {
+  position: sticky;
+  left: 0;
+  box-sizing: border-box;
+  max-width: 100cqi;
   padding: var(--espacio-3) var(--espacio-4);
   text-align: left;
   font-weight: 700;
+  white-space: normal;
+}
+
+/* Id de venta dentro de un título: nunca se parte en el guion ("V-" / "0001"). */
+.tabla__id {
+  white-space: nowrap;
 }
 
 .tabla th,
@@ -1438,12 +1452,6 @@ main { padding: clamp(1rem, 2.5vw, 2rem); }
    Solo afecta a Catálogo (#catalogo por salto de fragmento; #titulo-catalogo por el
    scroll del foco del h2). Las demás vistas conservan el scroll normal. */
 #catalogo, #titulo-catalogo { scroll-margin-top: 100rem; }
-.sidebar__marca:hover .sidebar__codex,
-.sidebar__marca:focus-visible .sidebar__codex { filter: drop-shadow(0 0 16px #cba6ffd9); }
-.sidebar__marca:hover .sidebar__editorial,
-.sidebar__marca:focus-visible .sidebar__editorial { text-shadow: 0 0 14px #cba6ffd9; }
-.sidebar__marca:hover .sidebar__estrella,
-.sidebar__marca:focus-visible .sidebar__estrella { transform: rotate(18deg) scale(1.25); }
 .tema-alternar { min-width: 2.5rem; min-height: 2.5rem; padding: .5rem; border-width: 1px; background: var(--color-surface); }
 .tema-alternar[aria-pressed="true"] { border-width: 1px; }
 .tema-alternar__icono { width: 1.375rem; height: 1.375rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
@@ -1513,13 +1521,6 @@ html:not(.js) .barra { display: flex; }
   .barra__inicio { padding-inline: .5rem; }
   .bienvenida__banner { padding: 1.25rem; }
   .bienvenida__contenido { padding: .75rem; margin: -.75rem; }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .sidebar__estrella { transition: transform .4s ease, opacity .4s ease; }
-  .sidebar__marca:hover .sidebar__codex,
-  .sidebar__marca:focus-visible .sidebar__codex { animation: marca-titilar 3.5s ease-in-out infinite; }
-  .sidebar__marca:hover .sidebar__estrella,
-  .sidebar__marca:focus-visible .sidebar__estrella { animation: marca-titilar 1.8s ease-in-out infinite; }
 }
 @media (forced-colors: active) {
   .bienvenida__contenido { background: Canvas; color: CanvasText; }

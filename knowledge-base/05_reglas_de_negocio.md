@@ -6,7 +6,7 @@ Cada regla tiene un código `RN-{DOMINIO}-{NN}`. Entre corchetes, la etapa respo
 - **RN-CA-01**: Cada libro muestra título, ISBN, editorial, género, autores y precio. [E1 maqueta / E2 render]
 - **RN-CA-02**: Si un libro no tiene género, se muestra «Sin clasificar». [E1/E2]
 - **RN-CA-03**: El catálogo se genera con JS a partir del array de libros. [E2]
-- **RN-CA-04**: El filtro por título ignora mayúsculas/minúsculas, busca coincidencias parciales y aplica `trim()` a la búsqueda. [E1]
+- **RN-CA-04**: El filtro por título ignora mayúsculas/minúsculas y tildes u otros diacríticos ("orbita" encuentra "Órbita lenta"; la ñ se compara como n), busca coincidencias parciales y aplica `trim()` a la búsqueda. [E1] _(Tildes: agregado el 15/10/2026, change `pulido-final-etapa1`.)_
 - **RN-CA-05**: Búsqueda vacía → catálogo completo. [E1]
 - **RN-CA-06**: Búsqueda sin coincidencias → mensaje claro de "sin resultados". [E1]
 

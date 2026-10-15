@@ -7,7 +7,7 @@ Define la estructura semántica y el contenido estático de las 5 vistas de Edit
 ## Requirements
 
 ### Requirement: Página única con estructura semántica
-La aplicación SHALL ser un único `index.html` en español (`lang="es"`) con un skip-link como primer elemento enfocable que lleva a `main#contenido`, un `header` con un único `h1` "Editorial Codex", un `aside` que contiene el `nav` principal, una barra superior como región con nombre accesible y `main`. Dentro de `main` SHALL haber 5 `section` con ids `catalogo`, `libros`, `clientes`, `ventas` e `historial`, cada una titulada por un `h2` sin saltar niveles de encabezado.
+La aplicación SHALL ser un único `index.html` en español (`lang="es"`) con un skip-link como primer elemento enfocable que lleva a `main#contenido`, un `header` con un único `h1` "Editorial Codex", un `aside` que contiene el `nav` principal, una barra superior como región con nombre accesible y `main`. Dentro de `main` SHALL haber 5 `section` de vista con ids `catalogo`, `libros`, `clientes`, `ventas` e `historial`, cada una titulada por un `h2` sin saltar niveles de encabezado.
 
 #### Scenario: Apertura por file://
 - **WHEN** se abre `index.html` con doble clic
@@ -80,11 +80,15 @@ Cada campo de formulario SHALL tener un `label` asociado por `for`/`id`, y cada 
 - **THEN** el foco pasa a ese campo
 
 ### Requirement: Tablas con encabezados
-Cada tabla SHALL tener encabezados de columna `th` y un título (`caption`) que la identifique.
+Cada tabla SHALL tener encabezados de columna `th` y un título (`caption`) que la identifique. Cada tabla SHALL estar dentro de un contenedor desplazable que sea un elemento `section` nativo (sin `role` explícito), con nombre accesible propio y enfocable con Tab.
 
 #### Scenario: Encabezados presentes
 - **WHEN** se inspecciona cualquier tabla de la maqueta
 - **THEN** tiene una fila de `th` con el nombre de cada columna
+
+#### Scenario: Contenedor de tabla nativo
+- **WHEN** se inspeccionan los 5 contenedores de tabla en el HTML y en el panel Accessibility de DevTools
+- **THEN** cada uno es un `<section>` sin atributo `role`, con su `aria-label` (por ejemplo "Tabla de ventas registradas"), `tabindex="0"`, y se expone con rol `region` y ese nombre
 
 ### Requirement: Mensajes de estado presentes y ocultos
 Los mensajes de estado de cada vista (vacío, sin resultados, errores, resultado de operación) SHALL estar presentes en el HTML con su texto de ejemplo y ocultos con `hidden`. Los mensajes de error SHALL expresarse con texto (prefijo "Error:"), no solo con color.

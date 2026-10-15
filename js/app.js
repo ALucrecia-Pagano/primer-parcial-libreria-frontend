@@ -230,9 +230,9 @@ function iniciarSidebar() {
     });
   }
 
-  // Activar un enlace cierra el menú (también el logo de la sidebar, que lleva a #catalogo);
-  // el foco lo mueve la navegación al h2 de la vista.
-  el.sidebar.querySelectorAll('.navegacion__enlace, .sidebar__marca').forEach(function (enlace) {
+  // Activar un enlace del menú lo cierra; el foco lo mueve la navegación al h2 de la vista.
+  // (La marca de la sidebar es solo texto: no navega ni cierra el menú.)
+  el.sidebar.querySelectorAll('.navegacion__enlace').forEach(function (enlace) {
     enlace.addEventListener('click', function () {
       if (!menuMovilAbierto()) {
         return;
@@ -288,15 +288,25 @@ function registrarFormulariosMaqueta() {
 // la reutilice tal cual sobre el array de libros (DD-07).
 // ---------------------------------------------------------------------------
 
-// Coincidencia por título: sin distinguir mayúsculas ni espacios en los bordes
-// de la búsqueda. Búsqueda vacía o solo espacios -> true. Tolera null/undefined.
-// No normaliza acentos (limitación conocida: "orbita" no encuentra "Órbita").
+// Texto comparable: en minúsculas y sin tildes ni otros diacríticos (NFD separa la
+// letra de su marca y el rango U+0300–U+036F quita las marcas). Pura; tolera null/undefined.
+// Efecto aceptado: la ñ queda como n ("nino" encuentra "niño").
+function normalizarTexto(texto) {
+  return String(texto == null ? '' : texto)
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
+}
+
+// Coincidencia por título: sin distinguir mayúsculas, tildes ni espacios en los bordes
+// de la búsqueda ("orbita" encuentra "Órbita lenta"). Búsqueda vacía o solo espacios -> true.
+// Tolera null/undefined.
 function coincideTitulo(titulo, busqueda) {
-  const texto = String(busqueda == null ? '' : busqueda).trim().toLowerCase();
+  const texto = normalizarTexto(String(busqueda == null ? '' : busqueda).trim());
   if (texto === '') {
     return true;
   }
-  return String(titulo == null ? '' : titulo).toLowerCase().includes(texto);
+  return normalizarTexto(titulo).includes(texto);
 }
 
 // Texto que anuncia la zona de estado #catalogo-resultados (pura, sin DOM).
