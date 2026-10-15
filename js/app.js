@@ -190,7 +190,7 @@ function abrirMenuMovil() {
   }
 }
 
-// devolverFoco: true al cerrar con botón o Escape (el foco vuelve a la hamburguesa).
+// devolverFoco: true al cerrar con botón, Escape o velo (el foco vuelve a la hamburguesa).
 function cerrarMenuMovil(devolverFoco) {
   const el = obtenerElementosSidebar();
   if (!menuMovilAbierto()) {
@@ -226,7 +226,7 @@ function iniciarSidebar() {
   }
   if (el.velo) {
     el.velo.addEventListener('click', function () {
-      cerrarMenuMovil(false);
+      cerrarMenuMovil(true);
     });
   }
 

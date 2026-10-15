@@ -111,7 +111,7 @@ La página es un único `index.html` con 5 vistas (`<section class="vista">`): C
 
 - El `nav#nav-principal` está dentro de `aside#sidebar`, con 5 enlaces, cada uno con ícono decorativo: Catálogo, Libros, Clientes, Ventas e Historial.
 - **Escritorio (≥ 1024 px):** `#sidebar-colapsar` la reduce a íconos (`aria-expanded`, `aria-controls="sidebar"`). Colapsada, el texto de cada enlace sigue disponible para lectores de pantalla y el nombre aparece como tooltip en `:hover` y `:focus-visible`. El estado se guarda en `localStorage` (`libreria.preferencias.sidebar`, valores `colapsada` o `expandida`).
-- **Celular (< 1024 px):** la sidebar queda fuera de pantalla con `visibility: hidden` (sus enlaces no entran en el orden de Tab). `#menu-abrir` la abre y lleva el foco al primer enlace; `#menu-cerrar`, la tecla Escape, un clic en `#sidebar-velo` o activar un enlace la cierran. Con botón o Escape el foco vuelve a `#menu-abrir`. Si la ventana pasa a escritorio con el menú abierto, se cierra sola.
+- **Celular (< 1024 px):** la sidebar queda fuera de pantalla con `visibility: hidden` (sus enlaces no entran en el orden de Tab). `#menu-abrir` la abre y lleva el foco al primer enlace; `#menu-cerrar`, la tecla Escape, un clic en `#sidebar-velo` o activar un enlace la cierran. Con botón, Escape o clic en el velo el foco vuelve a `#menu-abrir`. Si la ventana pasa a escritorio con el menú abierto, se cierra sola.
 
 ### Degradación sin JavaScript
 
@@ -385,11 +385,12 @@ Verificación manual en el navegador (sin tests automáticos). Se registra el co
 
 Registro **a mano**, en el navegador (sin tests automáticos). Se anota el comportamiento real observado, aunque falle (RN-GL-03). Lo que figura como "No ejecutado" no se ejecutó y no está aprobado.
 
-- **Fecha:** 14/10/2026
+- **Fecha:** 14/10/2026 (ítems posteriores: 14/10/2026 y 15/10/2026, ver «Ítems ejecutados después del cierre de C-02»)
 - **Navegador (nombre y versión):** Microsoft Edge 155.0.4283.45 (Chromium 155) en Windows 11
 - **Apertura:** `file://` (doble clic en `index.html`), con `localStorage` limpio al empezar
 - **Contraste:** los ratios se **calcularon con la fórmula de WCAG** (ver "Contraste de color (C-02)"); no se midieron en DevTools.
-- **Resumen:** 19 ítems ejecutados OK (uno, E1, parcial), 0 fallos, 14 ítems no ejecutados. El contraste es un cálculo, no una ejecución en el navegador.
+- **Resumen al cierre (14/10/2026):** 19 ítems ejecutados OK (uno, E1, parcial), 0 fallos, 14 ítems no ejecutados.
+- **Resumen actualizado (15/10/2026):** 32 ítems ejecutados OK y 0 fallos. Ningún ítem queda parcial: E1, A7 y A10 se completaron el 15/10/2026. Ningún ítem queda «No ejecutado»; A11 está cubierto por C-01. 13 de los 32 se ejecutaron después del cierre: 5 el 14/10/2026 y 8 el 15/10/2026, después del archivado (ver «Ítems ejecutados después del cierre de C-02»). El contraste es un cálculo, no una ejecución en el navegador.
 
 Columna "Tareas": a qué tarea de `openspec/changes/estilos-responsive-accesibilidad/tasks.md` aporta cada ítem (1.15 = Checklist A, 2.8 = Checklist B, 3.5 = 320/1280 px en ambos temas, 3.6 = teclado, 3.7 = preferencias y movimiento).
 
@@ -415,38 +416,45 @@ Columna "Tareas": a qué tarea de `openspec/changes/estilos-responsive-accesibil
 | C6 | A 320 px: `scrollWidth <= innerWidth` en las 5 vistas, tema claro y oscuro | 1.15, 2.8, 3.5 | OK — la prueba devuelve `true` en las 5 vistas, en tema claro y en oscuro |
 | C7 | A 320 px las tablas se desplazan dentro de su contenedor, no la página | 3.5 | OK — las tablas se desplazan dentro de su contenedor |
 | D1 | Sin JS a 320 px: menú visible, enlace «Inicio» de la barra visible, sin botones que dependan de JS (hamburguesa, colapsar, tema), vistas apiladas | 2.8 | OK — se ven el menú y la barra con «Inicio»; no hay hamburguesa, colapsar, cerrar ni tema; las vistas aparecen apiladas |
-| E1 | Ajuste final de diseño (D18): banner y tarjeta «Historias por descubrir» solo en Catálogo; «Inicio» lleva al Catálogo sin marcar `aria-current`; chips de autores en Libros con Tab y Espacio (foco visible); ícono sol/luna del botón de tema en ambos temas | 2.8, 3.5, 3.6 | OK (parcial) — «Inicio» de la barra vuelve al Catálogo sin `aria-current`; los chips de autores se operan con Tab y Espacio; el botón de tema muestra sol en oscuro y luna en claro; el banner y la tarjeta se ven en el Catálogo (A1). No se informó una comprobación explícita de que el banner y la tarjeta no aparezcan en las otras vistas |
+| E1 | Ajuste final de diseño (D18): banner y tarjeta «Historias por descubrir» solo en Catálogo; «Inicio» lleva al Catálogo sin marcar `aria-current`; chips de autores en Libros con Tab y Espacio (foco visible); ícono sol/luna del botón de tema en ambos temas | 2.8, 3.5, 3.6 | OK — «Inicio» de la barra vuelve al Catálogo sin `aria-current`; los chips de autores se operan con Tab y Espacio; el botón de tema muestra sol en oscuro y luna en claro; el banner y la tarjeta se ven en el Catálogo (A1). Completado el 15/10/2026: el banner y la tarjeta «Historias por descubrir» aparecen solo en Catálogo, no en las otras 4 vistas |
 | Contraste | Todos los pares ≥ 4.5:1 (texto) y ≥ 3:1 (no texto) en ambos temas | 1.15 | calculado con fórmula WCAG, ver tabla de "Contraste de color (C-02)" |
 
-### Ítems no ejecutados
+### Ítems ejecutados después del cierre de C-02
+
+Estos ítems no se ejecutaron el 14/10/2026 al cerrar C-02. B5, C1, C3, C5 y C8 se ejecutaron ese mismo día en «Verificación manual — ajustes de auditoría». A2, A3, A7, A10, A16, B3, D2 y D3 se ejecutaron el **15/10/2026, después del archivado** de C-02 y de `ajustes-auditoria-etapa1`, en Microsoft Edge 155.0.4283.45 (Chromium 155) en Windows 11, por `file://` (doble clic en `index.html`).
 
 | ID | Qué se verifica | Tareas | Resultado |
 |---|---|---|---|
-| A2 | Network: solo recursos locales | 1.15, 3.5 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| A3 | El foco no se mueve en la carga | 2.8 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| A7 | El título lleva a Catálogo y muestra el efecto | 3.6 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| A10 | Hashes: `#libros`, `#clientes`, `#ventas`, `#historial`, `#inexistente`, `#`, `#libro-titulo`, `#contenido` | 2.8 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1). C-01 solo cubrió `#ventas` y la carga sin hash; el resto no se registró |
+| A2 | Network: solo recursos locales | 1.15, 3.5 | Ejecutado después del archivado (15/10/2026): OK — en Network solo aparecen archivos locales (`index.html`, `styles.css`, `app.js`, la fuente, `banner-biblioteca.jpg` y `favicon.svg`); ningún recurso externo |
+| A3 | El foco no se mueve en la carga | 2.8 | Ejecutado después del archivado (15/10/2026): OK — al cargar, `document.activeElement.tagName` es `"BODY"`; el foco no se mueve a ningún `h2` |
+| A7 | El título lleva a Catálogo y muestra el efecto | 3.6 | Ejecutado después del archivado (15/10/2026): OK — Enter sobre el título «Editorial Codex» lleva al Catálogo; al pasar el mouse y con foco de teclado, el título muestra más brillo y las estrellas |
+| A10 | Hashes: `#libros`, `#clientes`, `#ventas`, `#historial`, `#inexistente`, `#`, `#libro-titulo`, `#contenido` | 2.8 | Ejecutado después del archivado (15/10/2026): OK — `#libros`, `#clientes` e `#historial` muestran su vista; `#inexistente` y `#` muestran Catálogo; `#libro-titulo` muestra Libros; `#contenido` desde Clientes conserva Clientes. `#ventas` y la carga sin hash ya estaban cubiertos en C-01 |
 | A11 | El botón "atrás" vuelve a la vista previa | 2.8 | No ejecutado en C-02: cubierto en C-01 (criterio "Botón 'atrás' del navegador vuelve a la vista previa" de *Verificación manual — C-01*). C-02 no cambió esa navegación |
-| A16 | Con movimiento reducido ni el título ni el fondo se animan solos | 1.15, 3.7 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| B3 | Solo existen claves `libreria.preferencias.*` en `localStorage` | 3.7 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| B5 | `scrollWidth <= innerWidth` en las 5 vistas a 1280 px, tema claro | 3.5 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| C1 | Con el menú cerrado, Tab no entra a los enlaces ocultos | 2.8 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| C3 | Cerrar el menú con el botón y con el velo | 2.8, 3.6 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| C5 | Abrir el menú y pasar a 1280 px no deja el velo | 2.8 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| C8 | A 320 px las flechas del teclado desplazan la tabla enfocada | 3.4b, 3.6 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) |
-| D2 | Sin JS a 320 px, el enlace "Ventas" desplaza a su sección | 2.8 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1). C-01 verificó las anclas sin JS, pero C-02 cambió el diseño de la sidebar, así que no alcanza como cobertura |
-| D3 | Sin JS a 1280 px | 2.8 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1). Mismo motivo que D2 |
+| A16 | Con movimiento reducido ni el título ni el fondo se animan solos | 1.15, 3.7 | Ejecutado después del archivado (15/10/2026): OK — con `prefers-reduced-motion: reduce`, el fondo y el título no se animan, tampoco en hover |
+| B3 | Solo existen claves `libreria.preferencias.*` en `localStorage` | 3.7 | Ejecutado después del archivado (15/10/2026): OK — en Local Storage solo están `libreria.preferencias.tema` y `libreria.preferencias.sidebar` |
+| B5 | `scrollWidth <= innerWidth` en las 5 vistas a 1280 px, tema claro | 3.5 | Cubierto después, en «Verificación manual — ajustes de auditoría» (V9, 14/10/2026): OK — la prueba da `true` en las 5 vistas en tema claro |
+| C1 | Con el menú cerrado, Tab no entra a los enlaces ocultos | 2.8 | Cubierto después, en «Verificación manual — ajustes de auditoría» (V6, 14/10/2026): OK — con el menú cerrado, Tab no pasa por los enlaces de la sidebar |
+| C3 | Cerrar el menú con el botón y con el velo | 2.8, 3.6 | Cubierto después, en «Verificación manual — ajustes de auditoría» (V4 y V5, 14/10/2026): OK — con el velo y con la ✕ el menú se cierra y el foco vuelve a la hamburguesa (con el velo, desde el ajuste de este change) |
+| C5 | Abrir el menú y pasar a 1280 px no deja el velo | 2.8 | Cubierto después, en «Verificación manual — ajustes de auditoría» (V7, 14/10/2026): OK — la sidebar queda a la izquierda y no queda velo |
+| C8 | A 320 px las flechas del teclado desplazan la tabla enfocada | 3.4b, 3.6 | Cubierto después, en «Verificación manual — ajustes de auditoría» (V8, 14/10/2026): OK — Tab llega a cada recuadro de tabla con contorno y las flechas la desplazan |
+| D2 | Sin JS a 320 px, el enlace "Ventas" desplaza a su sección | 2.8 | Ejecutado después del archivado (15/10/2026): OK — sin JS a 320 px, el enlace «Ventas» baja hasta su sección |
+| D3 | Sin JS a 1280 px | 2.8 | Ejecutado después del archivado (15/10/2026): OK — sin JS a 1280 px, la sidebar se ve sin los botones de colapsar ni de tema, y «Historial» baja hasta su sección |
 
-**Nota sobre la tarea 3.4b:** A9 (Tab llega a las 5 regiones de tabla y el foco se ve) se ejecutó y quedó OK; C8 (las flechas desplazan la tabla a 320 px) no se ejecutó, así que la 3.4b queda **verificada parcialmente**.
+**Nota sobre la tarea 3.4b:** A9 (Tab llega a las 5 regiones de tabla y el foco se ve) se ejecutó y quedó OK; C8 (las flechas desplazan la tabla a 320 px) no se ejecutó en C-02, así que la 3.4b quedó **verificada parcialmente**. C8 se ejecutó después (V8) y dio OK.
 
-**Cobertura por tarea** (decisión de Amanda del 14/10/2026: ejecución reducida; ningún fallo observado). Las tareas se marcaron como completas con cobertura parcial; lo no ejecutado **no** se da por aprobado:
+**Actualizaciones:**
 
-- **1.15** (Checklist A): no ejecutados A2 (Network) y A16 (movimiento reducido).
-- **2.8** (Checklist B): no ejecutados A3, A10, A11 (cubierto en C-01), C1, C3, C5, D2 y D3.
-- **3.4b** (regiones de tabla): no ejecutado C8 (flechas).
-- **3.5** (320/1280 px, ambos temas): no ejecutados A2 (Network) y B5 (1280 px en tema claro).
-- **3.6** (teclado): no ejecutados A7 (título/efecto), C3 (cerrar el menú con botón y velo) y C8.
-- **3.7** (preferencias y movimiento): solo se ejecutó B2; no ejecutados B3 (claves de `localStorage`) y A16 (movimiento reducido).
+- **14/10/2026 (change `ajustes-auditoria-etapa1`):** B5, C1, C3, C5 y C8 se ejecutaron en «Verificación manual — ajustes de auditoría» y dieron OK.
+- **15/10/2026, después del archivado:** se ejecutaron A2, A3, A7, A10, A16, B3, D2 y D3. Todos dieron OK; A7 y A10 quedaron parciales en esa primera pasada y se completaron el mismo día, junto con la parte pendiente de E1 (ver la columna Resultado). Ya no queda ningún ítem «No ejecutado» ni parcial en C-02; A11 sigue cubierto por C-01.
+
+**Cobertura por tarea** (decisión de Amanda del 14/10/2026: ejecución reducida, completada después con los ítems de arriba; ningún fallo observado). Las tareas se marcaron como completas el 14/10/2026 con cobertura parcial; al 15/10/2026 su cobertura quedó completa:
+
+- **1.15** (Checklist A): completa (A2 y A16 ejecutados después).
+- **2.8** (Checklist B): completa (A3, A10, C1, C3, C5, D2, D3 y la parte pendiente de E1 ejecutados después; A11 cubierto en C-01).
+- **3.4b** (regiones de tabla): completa (C8 ejecutado después).
+- **3.5** (320/1280 px, ambos temas): completa (A2, B5 y la parte pendiente de E1 ejecutados después).
+- **3.6** (teclado): completa (A7, C3, C8 y la parte pendiente de E1 ejecutados después).
+- **3.7** (preferencias y movimiento): completa (B3 y A16 ejecutados después).
 
 ## Qué es maqueta y qué funciona
 
@@ -505,11 +513,11 @@ Registro para completar **a mano**, en el navegador (sin tests automáticos). Se
 | 5 | Borrar todo el texto | Vuelven las 6 tarjetas; sin mensaje | Vuelven las 6 tarjetas, sin mensaje | OK |
 | 6 | Escribir `xyz` | Ninguna tarjeta; mensaje "No se encontraron libros que coincidan con la búsqueda." | Ninguna tarjeta; aparece «No se encontraron libros que coincidan con la búsqueda.» | OK |
 | 7 | Con `xyz` escrito, presionar Enter y luego clic en "Buscar" | No recarga, la URL no cambia, el texto se conserva | No recarga, la URL no cambia y el texto se conserva | OK |
-| 8 | Con el lector de pantalla del sistema (Narrador/NVDA) o el panel de Accesibilidad de DevTools, repetir 2 y 6 | Se anuncia/lee "Se muestra 1 de 6 libros." y "No se encontraron libros…" en `#catalogo-resultados` | No ejecutado (resultado no informado por la usuaria) | No ejecutado |
+| 8 | Con el lector de pantalla del sistema (Narrador/NVDA) o el panel de Accesibilidad de DevTools, repetir 2 y 6 | Se anuncia/lee "Se muestra 1 de 6 libros." y "No se encontraron libros…" en `#catalogo-resultados` | Ejecutado después (V10 de «Verificación manual — ajustes de auditoría»): `#catalogo-resultados` muestra «Se muestra 1 de 6 libros.» con `MAPA` y «No se encontraron libros que coincidan con la búsqueda.» con `xyz`. Se comprobó el texto de la zona de estado en DevTools, no el anuncio en voz de un lector de pantalla | OK |
 
 ### Caso manual 8 — Teclado y anchos 320 / 1280 px
 
-Resultado **parcial**: lo que figura como OK se ejecutó en la verificación de C-02 (ver "Verificación manual — C-02", mismo día y navegador); el resto no se ejecutó.
+Lo que figura como OK se ejecutó en la verificación de C-02 (ver "Verificación manual — C-02", mismo día y navegador); 8f y 8g se ejecutaron después, en «Verificación manual — ajustes de auditoría» (V9 y V8).
 
 | Caso | Qué se verifica | Cubierto por (C-02) | Resultado observado | Estado |
 |---|---|---|---|---|
@@ -518,5 +526,33 @@ Resultado **parcial**: lo que figura como OK se ejecutó en la verificación de 
 | 8c | 1280 px, tema oscuro, sin scroll horizontal en las 5 vistas | A14 | `scrollWidth <= innerWidth` da `true` en las 5 vistas | OK |
 | 8d | 320 px, tema claro y oscuro, sin scroll horizontal en las 5 vistas | C6 | `scrollWidth <= innerWidth` da `true` en las 5 vistas, en claro y en oscuro | OK |
 | 8e | 320 px: las tablas se desplazan dentro de su contenedor | C7 | Las tablas se desplazan dentro de su contenedor | OK |
-| 8f | 1280 px, tema claro, sin scroll horizontal en las 5 vistas | B5 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) | No ejecutado |
-| 8g | 320 px: las flechas del teclado desplazan la tabla enfocada | C8 | No ejecutado: no priorizado por tiempo (cierre de Etapa 1) | No ejecutado |
+| 8f | 1280 px, tema claro, sin scroll horizontal en las 5 vistas | B5 (V9) | `scrollWidth <= innerWidth` da `true` en las 5 vistas en tema claro | OK |
+| 8g | 320 px: las flechas del teclado desplazan la tabla enfocada | C8 (V8) | Las flechas desplazan la tabla enfocada, con contorno de foco visible | OK |
+
+## Verificación manual — ajustes de auditoría
+
+Plantilla para completar **a mano**, en el navegador (sin tests automáticos), después de los ajustes del change `ajustes-auditoria-etapa1`: celdas de tabla sin cortes, barra superior como región «Barra superior» y foco devuelto a la hamburguesa al cerrar el menú con el velo. Se anota el comportamiento real observado, aunque falle (RN-GL-03). Cada fila registra lo que se observó al ejecutarla.
+
+- **Fecha:** 14/10/2026
+- **Navegador (nombre y versión):** Microsoft Edge 155.0.4283.45 (Chromium 155) en Windows 11
+- **Apertura:** `file://` (doble clic en `index.html`), con recarga forzada (Ctrl+F5)
+- **Ejecutó:** Amanda Pagano
+- **Resumen:** 12 de 12 ítems OK, 0 fallos. Quedan cubiertos B5, C1, C3, C5 y C8 de C-02, y 8f, 8g y el paso 8 del caso 1 de la Etapa 1.
+- **Banner recomprimido** (`assets/img/banner-biblioteca.jpg`, de 1.959.804 a 276.306 bytes, 1280×1920, JPEG calidad 80): se ve bien en el banner del Catálogo y como fondo difuminado, en los dos temas.
+
+Columna «Cubre»: ítem pendiente de «Verificación manual — C-02» o de «Casos manuales de la Etapa 1» que queda cubierto si la fila da OK.
+
+| ID | Qué se verifica | Cómo | Resultado esperado | Cubre | Resultado observado | Estado |
+|---|---|---|---|---|---|---|
+| V1 | Historial a 320 px: celdas sin cortes | DevTools en 320 px, vista Historial | «V-0001», «13/10/2026 14:30» y «$ 5.000,00» en una sola línea; la tabla se desplaza dentro de su contenedor y la página no | — | En Historial a 320 px, «V-0001», la fecha y el total se ven en una sola línea; la tabla se desplaza dentro de su recuadro | OK |
+| V2 | Tablas de Libros, Clientes, Ventas e Historial (con el detalle) a 320 px | Recorrer las 4 vistas; en consola `document.documentElement.scrollWidth <= window.innerWidth` | Ninguna celda se parte, cada tabla scrollea en su contenedor y la prueba da `true` en las 4 vistas | — | Ninguna celda partida en Libros, Clientes, Ventas e Historial; la prueba da `true` en las 4 vistas | OK |
+| V3 | Barra superior como región | Panel Accessibility de DevTools sobre la barra | Rol `region` con nombre «Barra superior»; la barra se ve igual que antes a 320 y 1280 px | — | `section.barra` con Role `region` y Name «Barra superior» | OK |
+| V4 | Cerrar el menú con el velo | A 320 px: abrir con la hamburguesa, clic en el velo; en consola `document.activeElement.id` | El menú se cierra, `aria-expanded` vuelve a `"false"` y la consola muestra `"menu-abrir"` | C3 | Al cerrar con el velo, `document.activeElement.id` es `"menu-abrir"` | OK |
+| V5 | Cerrar el menú con el botón cerrar | A 320 px: abrir con la hamburguesa, activar «Cerrar menú» con Enter | El menú se cierra y el foco queda en la hamburguesa | C3 | Al cerrar con la ✕, el foco queda visible en la hamburguesa | OK |
+| V6 | Tab no entra al menú cerrado | A 320 px con el menú cerrado, recorrer con Tab | El foco no pasa por los enlaces ocultos de la sidebar | C1 | Con el menú cerrado, Tab no pasa por los enlaces de la sidebar | OK |
+| V7 | Pasar de 320 a 1280 px con el menú abierto | Abrir el menú a 320 px y cambiar a 1280 px | La sidebar queda en su lugar de escritorio y no queda ningún velo sobre la página | C5 | Al pasar de 320 a 1280 px con el menú abierto, la sidebar queda a la izquierda y no queda velo | OK |
+| V8 | Flechas desplazan las tablas a 320 px | Llegar con Tab a cada región de tabla y usar ← / → | El contenedor muestra foco visible y las flechas desplazan la tabla | C8, 8g | Tab llega a cada recuadro de tabla con contorno y las flechas lo desplazan | OK |
+| V9 | 5 vistas a 1280 px en tema claro | Tema claro, recorrer las 5 vistas; en consola `document.documentElement.scrollWidth <= window.innerWidth` | `true` en las 5 vistas | B5, 8f | Tema claro a 1280 px: `true` en las 5 vistas | OK |
+| V10 | Anuncio de `#catalogo-resultados` | Con Narrador/NVDA o el panel Accessibility, escribir `MAPA` y luego `xyz` en el buscador | Se anuncia/lee «Se muestra 1 de 6 libros.» y «No se encontraron libros que coincidan con la búsqueda.» | Caso 1, paso 8 | `#catalogo-resultados` muestra «Se muestra 1 de 6 libros.» con `MAPA` y «No se encontraron libros que coincidan con la búsqueda.» con `xyz` (se comprobó el texto de la zona de estado en DevTools, no el anuncio en voz de un lector de pantalla) | OK |
+| V11 | Recorrido con teclado a 320 y 1280 px, en ambos temas | Tab / Shift+Tab por la barra, el menú y las 5 vistas | Orden lógico y foco siempre visible, incluida la barra superior | — | Orden lógico y foco visible en todo, también en «Inicio» y en el botón de tema | OK |
+| V12 | Consola sin errores | Consola abierta durante V1–V11 | Ningún error | — | Ningún error en la consola | OK |
