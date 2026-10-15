@@ -188,7 +188,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - **Identidad visual del prototipo**
     - Fuente local Cinzel Decorative en `fonts/CinzelDecorative-Bold.ttf` vía `@font-face`, con su licencia `fonts/OFL.txt`; sin Google Fonts ni CDN
     - Título "Editorial Codex" con degradé violeta-azul (color sólido de respaldo y `forced-colors`), estrellas doradas y ornamento decorativos, y efecto "mágico" en hover/foco (respetando `prefers-reduced-motion`)
-    - Fondo galáctico **solo con CSS** (base negro azulado, nebulosas rosa/morado/violeta con `radial-gradient` y estrellas con capas repetidas; decorativo; movimiento lento solo bajo `prefers-reduced-motion: no-preference`); el tema claro comparte el fondo y el encabezado del oscuro y solo aclara los paneles. **Fondo y tapas sin imágenes** (las `portada*.jpg` se eliminaron); tras el ajuste final de diseño (D18) hay **una única imagen decorativa**, `assets/img/banner-biblioteca.jpg` (banner del Catálogo, aplicada por CSS, procedencia a completar en el README), además del favicon `assets/img/favicon.svg`
+    - Fondo galáctico con CSS (base negro azulado, nebulosas rosa/morado/violeta con `radial-gradient` y estrellas con capas repetidas; decorativo; movimiento lento solo bajo `prefers-reduced-motion: no-preference`); el tema claro comparte el fondo y el encabezado del oscuro y solo aclara los paneles. **Tapas sin imágenes** (solo CSS) y las `portada*.jpg` se eliminaron; tras el ajuste final de diseño (D18–D21) hay **una única foto decorativa**, `assets/img/banner-biblioteca.jpg`, aplicada por CSS en el banner del Catálogo y, difuminada, como fondo de la página debajo del velo galáctico, en ambos temas (procedencia en el README: Valentin Antonini, Unsplash, Licencia Unsplash), además del favicon `assets/img/favicon.svg`
     - Superficies (`main`, sidebar, tarjetas, tablas) con degradé rosa/morado/negro y borde con brillo violeta-rosa; acento rosa (`--color-acento-rosa`) en hover, enlace activo y tooltip; contraste del texto calculado contra el tramo más claro de cada degradé (si no llega, se oscurece el degradé, no el texto)
   - **Sidebar colapsable** (`aside#sidebar` con `nav-principal` adentro, 5 enlaces con ícono y tooltip)
     - Escritorio: botón con flechita que colapsa/expande la sidebar (`aria-expanded`, `aria-controls`); estado recordado en `localStorage`
@@ -220,7 +220,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - Colapsar la sidebar y cambiar de tema; recargar: las dos preferencias se mantienen, bajo claves `libreria.preferencias.*`
   - Con `prefers-reduced-motion` activo, el título y el fondo no se animan solos
   - Con JavaScript deshabilitado el menú se ve y funciona como anclas
-  - El README indica qué imágenes se usan (fondo y tapas 100% CSS; el favicon SVG y el banner decorativo `banner-biblioteca.jpg` con su procedencia a completar), la licencia de la fuente y la tabla de contrato actualizada
+  - El README indica qué imágenes se usan (fondo y tapas 100% CSS; el favicon SVG y el banner decorativo `banner-biblioteca.jpg` con su procedencia registrada: Valentin Antonini en Unsplash, Licencia Unsplash), la licencia de la fuente y la tabla de contrato actualizada
 - **Leer antes**:
   - `knowledge-base/06_funcionalidades.md` §US-003, §US-004
   - `knowledge-base/05_reglas_de_negocio.md` §RN-UI-05..10
