@@ -58,15 +58,23 @@ El envío de `#form-busqueda` (Enter en el campo o clic en "Buscar") SHALL aplic
 - **THEN** la página no se recarga, la URL no cambia, el texto sigue en el campo y se ve solo "Cartas desde el sur"
 
 ### Requirement: Visibilidad de las tarjetas
-Cada tarjeta de `#catalogo-lista` SHALL mostrarse cuando su título coincide con la búsqueda y ocultarse con el atributo `hidden` cuando no coincide. El filtro SHALL comparar contra el título visible de la tarjeta, sin quitar ni crear tarjetas.
+El catálogo SHALL renderizarse desde el array `libros` aplicando `coincideTitulo` sobre cada entrada, creando o quitando tarjetas dinámicamente en `#catalogo-lista` según coincidan o no con la búsqueda. El filtro SHALL comparar contra el título de cada libro del array; las tarjetas que no coinciden no se renderizan.
 
-#### Scenario: Tarjetas ocultas siguen en el DOM
-- **WHEN** se busca `mapa` y se inspecciona `#catalogo-lista`
-- **THEN** siguen las 6 tarjetas en el DOM; 5 tienen `hidden` y "El mapa invisible" no
+#### Scenario: Filtrar re-renderiza desde el array
+- **WHEN** se busca `mapa`
+- **THEN** se renderiza solo la tarjeta "El mapa invisible" y las demás no aparecen en `#catalogo-lista`
 
-#### Scenario: Tarjetas ocultas fuera del recorrido de teclado
-- **WHEN** hay tarjetas ocultas por el filtro y se recorre la vista con Tab
-- **THEN** el foco no entra en ninguna tarjeta oculta
+#### Scenario: Búsqueda vacía muestra todos los libros
+- **WHEN** el buscador está vacío
+- **THEN** se renderizan todos los libros del array `libros` en `#catalogo-lista`
+
+#### Scenario: Texto inexistente no renderiza tarjetas
+- **WHEN** se busca `xyz`
+- **THEN** no se renderiza ninguna tarjeta en `#catalogo-lista`
+
+#### Scenario: Tarjetas fuera del recorrido de teclado
+- **WHEN** hay tarjetas no renderizadas por el filtro y se recorre la vista con Tab
+- **THEN** el foco no entra en ninguna tarjeta que no existe en el DOM
 
 ### Requirement: Mensaje sin resultados
 Cuando el catálogo tiene tarjetas y ninguna coincide, `#catalogo-sin-resultados` SHALL mostrarse quitando su `hidden`; en cualquier otro caso SHALL quedar oculto. `#catalogo-vacio` no forma parte del filtro y conserva su estado.

@@ -136,6 +136,21 @@ La maqueta recuerda dos preferencias de **presentación** en `localStorage`. No 
 - **Fallos tolerados:** toda lectura y escritura de `localStorage` está dentro de `try/catch` (`leerPreferencia` y `guardarPreferencia` en `js/app.js`). Si el almacenamiento está bloqueado, lleno o no existe, la página funciona igual con los valores por defecto: el cambio se aplica en la sesión actual, pero no se recuerda al recargar.
 - **Sin JavaScript** no hay preferencias: los botones de tema y de colapsar no se muestran y se ve el tema oscuro.
 
+## Datos de dominio guardados en el navegador (C-05)
+
+Los datos de dominio (libros, clientes y ventas) se guardan en `localStorage` bajo claves propias, separadas de las preferencias de presentación (`libreria.preferencias.*`).
+
+| Clave | Contenido | Quién la escribe |
+|---|---|---|
+| `libreria.libros` | Array de objetos libro (id, titulo, isbn, precio, editorialId, generoId, autorIds) | C-05 al arranque; C-06 al dar de alta un libro |
+| `libreria.clientes` | Array de objetos cliente (id, nombreCompleto, email) | C-05 al arranque; C-07 al dar de alta un cliente |
+| `libreria.ventas` | Array de objetos venta (id, fecha, clienteId, clienteNombre, renglones[], total) | C-09 al confirmar una venta |
+
+- **Arranque:** si una clave no existe en `localStorage`, se cargan los seed iniciales y se guardan. Si ya existe, se usa lo guardado sin mezclar con seed (evita duplicados al recargar).
+- **JSON corrupto:** si una clave contiene JSON inválido, la aplicación usa el seed inicial para esa clave y muestra un mensaje de error en pantalla (C-05).
+- **Límite:** los datos persisten solo en el navegador y perfil actual. Si se abre el proyecto desde otra carpeta, otro navegador o en modo incógnito, no hay datos guardados (se cargan los seed).
+- **Sin JavaScript:** no hay persistencia; la página funciona con los seed en memoria.
+
 ## Recursos y procedencia
 
 - **Imágenes: una sola, decorativa.** `assets/img/banner-biblioteca.jpg` es la foto del banner «Hola, lector» del Catálogo y, además, **se usa también, muy difuminada y oscurecida, como fondo de la página en ambos temas** (detrás del velo galáctico; ver «Fondo galáctico y foto difuminada»). Es un archivo local (sin pedidos externos) que se aplica **solo por CSS** (`background-image` de `.bienvenida__banner`, con un velo degradé por encima y un `background-color` de respaldo si no carga, y `html::before` para el fondo): **decorativa, aplicada por CSS (sin `<img>` ni texto alternativo)**. Las nebulosas y estrellas de la página y las tapas de los libros siguen dibujándose **100% con CSS** (degradés), sin archivos de imagen (DD-12, DD-14). El otro archivo gráfico del proyecto es el favicon `assets/img/favicon.svg`, hecho a mano. Si más adelante aparece otra idea que necesite una imagen (por ejemplo en el change opcional C-12), se documenta acá igual que el banner.

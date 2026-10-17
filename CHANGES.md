@@ -279,9 +279,9 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ## FASE 4 — Datos y persistencia
 
 ### [C-04] `datos-locales-catalogo-dinamico`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-10-17-datos-locales-catalogo-dinamico/`)
 - **Ejercicio**: Ej. 3 — Datos locales y catálogo dinámico
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Mateo Liendo (Etapa 2)
 - **Scope**:
   - Arrays con ids estables: `libros` (>= 6, uno sin género), `editoriales` (>= 2), `generos` (>= 2), `autores` (>= 3), `clientes` (>= 3); incluir libros con precio 1500 y 2000 para el caso manual 5 (US-006)
   - Catálogo renderizado desde `libros` en `#catalogo-lista` con `createElement`/`textContent`; «Sin clasificar» si `generoId` es `null` (RN-CA-01/02/03, RN-GL-01)
@@ -303,9 +303,9 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-07, §DD-10, §DD-11, §SU-03
 
 ### [C-05] `persistencia-localstorage`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-10-17-persistencia-localstorage/`)
 - **Ejercicio**: Ej. 6 — Persistencia en `localStorage`
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Mateo Liendo (Etapa 2)
 - **Scope**:
   - Repositorio de `localStorage` (`cargar(clave)` / `guardar(clave, datos)`) para `libreria.libros`, `libreria.clientes`, `libreria.ventas` (US-011, RN-PE-01)
   - Arranque (Flujo 6): claves ausentes → cargar seed y guardarlo; presentes → usar lo guardado sin mezclar con seed (RN-PE-02)
@@ -519,8 +519,8 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 | C-01 | `estructura-html-navegacion` | 1 | Ej. 1 | Pagano Amanda | MEDIO | — |
 | C-02 | `estilos-responsive-accesibilidad` | 1 | Ej. 2 + identidad visual del prototipo (DD-14) | Pagano Amanda | MEDIO | C-01 |
 | C-03 | `filtro-titulo-readme-avance` | 1 | Ej. 3 (filtro adelantado) + avance | Pagano Amanda | MEDIO | C-01, C-02 |
-| C-04 | `datos-locales-catalogo-dinamico` | 2 | Ej. 3 | A definir | ALTO | C-01, C-03 |
-| C-05 | `persistencia-localstorage` | 2 | Ej. 6 | A definir | ALTO | C-04 |
+| C-04 | `datos-locales-catalogo-dinamico` | 2 | Ej. 3 | Mateo Liendo | ALTO | C-01, C-03 |
+| C-05 | `persistencia-localstorage` | 2 | Ej. 6 | Mateo Liendo | ALTO | C-04 |
 | C-06 | `alta-libros` | 2 | Ej. 4 | A definir | MEDIO | C-05 |
 | C-07 | `alta-clientes` | 2 | Ej. 4 | A definir | MEDIO | C-05 |
 | C-08 | `composicion-venta` | 2 | Ej. 5 | A definir | MEDIO | C-05 |

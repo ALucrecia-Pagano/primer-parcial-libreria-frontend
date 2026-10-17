@@ -6,6 +6,8 @@
   <title>Editorial Codex</title>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
+  <script src="js/data.js" defer></script>
+  <script src="js/storage.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -53,6 +55,10 @@
       </section>
 
       <main id="contenido" tabindex="-1">
+  <div id="error-persistencia" class="mensaje mensaje--error" role="alert" hidden>
+    <strong>Error de datos:</strong> Se detectó un problema con la información guardada y se restauraron los valores iniciales. Tus cambios recientes podrían no estar disponibles.
+  </div>
+
         <!-- Vista: Catálogo -->
         <section id="catalogo" class="vista" aria-labelledby="titulo-catalogo">
           <h2 id="titulo-catalogo" class="vista__titulo" tabindex="-1">Catálogo</h2>
@@ -88,114 +94,7 @@
           <p id="catalogo-vacio" class="mensaje mensaje--vacio" hidden>Todavía no hay libros en el catálogo.</p>
 
           <div id="catalogo-lista" class="vista__lista">
-            <article class="tarjeta">
-              <div class="tarjeta__tapa tapa tapa--degrade-1" aria-hidden="true">
-                <span class="tarjeta__tapa-titulo">La casa del faro</span>
-                <span class="tarjeta__tapa-autor">Lucía Ferreyra</span>
-              </div>
-              <h3 class="tarjeta__titulo">La casa del faro</h3>
-              <dl class="tarjeta__datos">
-                <dt>ISBN</dt>
-                <dd>978-987-0001-01-1</dd>
-                <dt>Editorial</dt>
-                <dd>Ediciones del Faro</dd>
-                <dt>Género</dt>
-                <dd>Novela</dd>
-                <dt>Autores</dt>
-                <dd>Lucía Ferreyra</dd>
-              </dl>
-              <p class="tarjeta__precio">$&nbsp;1.500,00</p>
-            </article>
-            <article class="tarjeta">
-              <div class="tarjeta__tapa tapa tapa--degrade-2" aria-hidden="true">
-                <span class="tarjeta__tapa-titulo">Estrellas de papel</span>
-                <span class="tarjeta__tapa-autor">Tomás Aguirre</span>
-              </div>
-              <h3 class="tarjeta__titulo">Estrellas de papel</h3>
-              <dl class="tarjeta__datos">
-                <dt>ISBN</dt>
-                <dd>978-987-0001-02-8</dd>
-                <dt>Editorial</dt>
-                <dd>Prisma Editorial</dd>
-                <dt>Género</dt>
-                <dd>Ciencia ficción</dd>
-                <dt>Autores</dt>
-                <dd>Tomás Aguirre</dd>
-              </dl>
-              <p class="tarjeta__precio">$&nbsp;2.000,00</p>
-            </article>
-            <article class="tarjeta">
-              <div class="tarjeta__tapa tapa tapa--degrade-3" aria-hidden="true">
-                <span class="tarjeta__tapa-titulo">Cartas desde el sur</span>
-                <span class="tarjeta__tapa-autor">Inés Montoya</span>
-              </div>
-              <h3 class="tarjeta__titulo">Cartas desde el sur</h3>
-              <dl class="tarjeta__datos">
-                <dt>ISBN</dt>
-                <dd>978-987-0001-03-5</dd>
-                <dt>Editorial</dt>
-                <dd>Ediciones del Faro</dd>
-                <dt>Género</dt>
-                <dd>Novela</dd>
-                <dt>Autores</dt>
-                <dd>Inés Montoya</dd>
-              </dl>
-              <p class="tarjeta__precio">$&nbsp;1.800,00</p>
-            </article>
-            <article class="tarjeta">
-              <div class="tarjeta__tapa tapa tapa--degrade-4" aria-hidden="true">
-                <span class="tarjeta__tapa-titulo">Órbita lenta</span>
-                <span class="tarjeta__tapa-autor">Lucía Ferreyra, Tomás Aguirre</span>
-              </div>
-              <h3 class="tarjeta__titulo">Órbita lenta</h3>
-              <dl class="tarjeta__datos">
-                <dt>ISBN</dt>
-                <dd>978-987-0001-04-2</dd>
-                <dt>Editorial</dt>
-                <dd>Prisma Editorial</dd>
-                <dt>Género</dt>
-                <dd>Ciencia ficción</dd>
-                <dt>Autores</dt>
-                <dd>Lucía Ferreyra, Tomás Aguirre</dd>
-              </dl>
-              <p class="tarjeta__precio">$&nbsp;2.500,00</p>
-            </article>
-            <article class="tarjeta">
-              <div class="tarjeta__tapa tapa tapa--degrade-5" aria-hidden="true">
-                <span class="tarjeta__tapa-titulo">Manual de jardinería urbana</span>
-                <span class="tarjeta__tapa-autor">Inés Montoya</span>
-              </div>
-              <h3 class="tarjeta__titulo">Manual de jardinería urbana</h3>
-              <dl class="tarjeta__datos">
-                <dt>ISBN</dt>
-                <dd>978-987-0001-05-9</dd>
-                <dt>Editorial</dt>
-                <dd>Ediciones del Faro</dd>
-                <dt>Género</dt>
-                <dd>Sin clasificar</dd>
-                <dt>Autores</dt>
-                <dd>Inés Montoya</dd>
-              </dl>
-              <p class="tarjeta__precio">$&nbsp;2.750,00</p>
-            </article>
-            <article class="tarjeta">
-              <div class="tarjeta__tapa tapa tapa--degrade-6" aria-hidden="true">
-                <span class="tarjeta__tapa-titulo">El mapa invisible</span>
-                <span class="tarjeta__tapa-autor">Tomás Aguirre</span>
-              </div>
-              <h3 class="tarjeta__titulo">El mapa invisible</h3>
-              <dl class="tarjeta__datos">
-                <dt>ISBN</dt>
-                <dd>978-987-0001-06-6</dd>
-                <dt>Editorial</dt>
-                <dd>Prisma Editorial</dd>
-                <dt>Género</dt>
-                <dd>Novela</dd>
-                <dt>Autores</dt>
-                <dd>Tomás Aguirre</dd>
-              </dl>
-              <p class="tarjeta__precio">$&nbsp;1.200,00</p>
-            </article>
+            <!-- Las tarjetas se renderizan desde el array `libros` (C-04) -->
           </div>
         </section>
 
@@ -272,54 +171,7 @@
                 </tr>
               </thead>
               <tbody id="libros-tabla">
-                <tr>
-                  <td>La casa del faro</td>
-                  <td>978-987-0001-01-1</td>
-                  <td>Ediciones del Faro</td>
-                  <td>Novela</td>
-                  <td>Lucía Ferreyra</td>
-                  <td>$&nbsp;1.500,00</td>
-                </tr>
-                <tr>
-                  <td>Estrellas de papel</td>
-                  <td>978-987-0001-02-8</td>
-                  <td>Prisma Editorial</td>
-                  <td>Ciencia ficción</td>
-                  <td>Tomás Aguirre</td>
-                  <td>$&nbsp;2.000,00</td>
-                </tr>
-                <tr>
-                  <td>Cartas desde el sur</td>
-                  <td>978-987-0001-03-5</td>
-                  <td>Ediciones del Faro</td>
-                  <td>Novela</td>
-                  <td>Inés Montoya</td>
-                  <td>$&nbsp;1.800,00</td>
-                </tr>
-                <tr>
-                  <td>Órbita lenta</td>
-                  <td>978-987-0001-04-2</td>
-                  <td>Prisma Editorial</td>
-                  <td>Ciencia ficción</td>
-                  <td>Lucía Ferreyra, Tomás Aguirre</td>
-                  <td>$&nbsp;2.500,00</td>
-                </tr>
-                <tr>
-                  <td>Manual de jardinería urbana</td>
-                  <td>978-987-0001-05-9</td>
-                  <td>Ediciones del Faro</td>
-                  <td>Sin clasificar</td>
-                  <td>Inés Montoya</td>
-                  <td>$&nbsp;2.750,00</td>
-                </tr>
-                <tr>
-                  <td>El mapa invisible</td>
-                  <td>978-987-0001-06-6</td>
-                  <td>Prisma Editorial</td>
-                  <td>Novela</td>
-                  <td>Tomás Aguirre</td>
-                  <td>$&nbsp;1.200,00</td>
-                </tr>
+                <!-- Las filas se renderizan desde el array `libros` (C-04) -->
               </tbody>
             </table>
           </section>
@@ -361,18 +213,7 @@
                 </tr>
               </thead>
               <tbody id="clientes-tabla">
-                <tr>
-                  <td>Carla Benítez</td>
-                  <td>carla.benitez@example.com</td>
-                </tr>
-                <tr>
-                  <td>Martín Sosa</td>
-                  <td>martin.sosa@example.com</td>
-                </tr>
-                <tr>
-                  <td>Julieta Rinaldi</td>
-                  <td>julieta.rinaldi@example.com</td>
-                </tr>
+                <!-- Las filas se renderizan desde el array `clientes` (C-04) -->
               </tbody>
             </table>
           </section>

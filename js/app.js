@@ -118,6 +118,17 @@ function mostrarVista(id, opciones) {
 
   vistaActual = id;
 
+  // Render inicial de listados desde los arrays (C-04).
+  if (id === 'catalogo') {
+    renderCatalogo(libros);
+  }
+  if (id === 'libros') {
+    renderLibros();
+  }
+  if (id === 'clientes') {
+    renderClientes();
+  }
+
   if (moverFoco) {
     const titulo = document.querySelector('#' + id + ' .vista__titulo');
     if (titulo) {
@@ -323,35 +334,174 @@ function textoResultadosCatalogo(visibles, total, busquedaVacia) {
   return 'Se muestran ' + visibles + ' de ' + total + ' libros.';
 }
 
-// Parte DOM: oculta/muestra tarjetas con hidden y actualiza los mensajes.
-// En C-04 se reemplaza el cuerpo por un re-render desde el array de libros.
+// ---------------------------------------------------------------------------
+// Helpers de datos (C-04): resuelven nombres de editorial, género y autores
+// a partir de los ids estables del array.
+// ---------------------------------------------------------------------------
+function obtenerNombreEditorial(id) {
+  const editorial = editoriales.find(function (e) {
+    return e.id === id;
+  });
+  return editorial ? editorial.nombre : '';
+}
+
+function obtenerNombreGenero(id) {
+  const genero = generos.find(function (g) {
+    return g.id === id;
+  });
+  return genero ? genero.nombre : '';
+}
+
+function obtenerNombresAutores(ids) {
+  return ids.map(function (id) {
+    const autor = autores.find(function (a) {
+      return a.id === id;
+    });
+    return autor ? autor.nombre : '';
+  }).join(', ');
+}
+
+// Renderiza el catálogo desde un array de libros (C-04).
+// Usa createElement para la estructura y textContent para todo el texto (RN-GL-01).
+function renderCatalogo(librosAMostrar) {
+  const lista = document.getElementById('catalogo-lista');
+  if (!lista) {
+    return;
+  }
+  // Vaciar contenedor nodo a nodo (sin innerHTML).
+  while (lista.firstChild) {
+    lista.removeChild(lista.firstChild);
+  }
+
+  librosAMostrar.forEach(function (libro, index) {
+    const articulo = document.createElement('article');
+    articulo.className = 'tarjeta';
+
+    // Tapa (CSS generada, sin imágenes).
+    const tapa = document.createElement('div');
+    tapa.className = 'tarjeta__tapa tapa tapa--degrade-' + ((index % 6) + 1);
+    tapa.setAttribute('aria-hidden', 'true');
+    const tapaTitulo = document.createElement('span');
+    tapaTitulo.className = 'tarjeta__tapa-titulo';
+    tapaTitulo.textContent = libro.titulo;
+    const tapaAutor = document.createElement('span');
+    tapaAutor.className = 'tarjeta__tapa-autor';
+    tapaAutor.textContent = obtenerNombresAutores(libro.autorIds);
+    tapa.appendChild(tapaTitulo);
+    tapa.appendChild(tapaAutor);
+    articulo.appendChild(tapa);
+
+    // Título.
+    const tituloEl = document.createElement('h3');
+    tituloEl.className = 'tarjeta__titulo';
+    tituloEl.textContent = libro.titulo;
+    articulo.appendChild(tituloEl);
+
+    // Datos.
+    const dl = document.createElement('dl');
+    dl.className = 'tarjeta__datos';
+
+    function agregarDato(etiqueta, valor) {
+      const dt = document.createElement('dt');
+      dt.textContent = etiqueta;
+      const dd = document.createElement('dd');
+      dd.textContent = valor;
+      dl.appendChild(dt);
+      dl.appendChild(dd);
+    }
+
+    agregarDato('ISBN', libro.isbn);
+    agregarDato('Editorial', obtenerNombreEditorial(libro.editorialId));
+    agregarDato('Género', libro.generoId ? obtenerNombreGenero(libro.generoId) : 'Sin clasificar');
+    agregarDato('Autores', obtenerNombresAutores(libro.autorIds));
+    articulo.appendChild(dl);
+
+    // Precio formateado en ARS.
+    const precio = document.createElement('p');
+    precio.className = 'tarjeta__precio';
+    precio.textContent = formatearImporteARS(libro.precio);
+    articulo.appendChild(precio);
+
+    lista.appendChild(articulo);
+  });
+}
+
+// Renderiza el listado de Libros desde el array libros (C-04).
+function renderLibros() {
+  const tabla = document.getElementById('libros-tabla');
+  if (!tabla) {
+    return;
+  }
+  while (tabla.firstChild) {
+    tabla.removeChild(tabla.firstChild);
+  }
+
+  libros.forEach(function (libro) {
+    const fila = document.createElement('tr');
+
+    function agregarCelda(texto) {
+      const celda = document.createElement('td');
+      celda.textContent = texto;
+      fila.appendChild(celda);
+    }
+
+    agregarCelda(libro.titulo);
+    agregarCelda(libro.isbn);
+    agregarCelda(obtenerNombreEditorial(libro.editorialId));
+    agregarCelda(libro.generoId ? obtenerNombreGenero(libro.generoId) : 'Sin clasificar');
+    agregarCelda(obtenerNombresAutores(libro.autorIds));
+    agregarCelda(formatearImporteARS(libro.precio));
+
+    tabla.appendChild(fila);
+  });
+}
+
+// Renderiza el listado de Clientes desde el array clientes (C-04).
+function renderClientes() {
+  const tabla = document.getElementById('clientes-tabla');
+  if (!tabla) {
+    return;
+  }
+  while (tabla.firstChild) {
+    tabla.removeChild(tabla.firstChild);
+  }
+
+  clientes.forEach(function (cliente) {
+    const fila = document.createElement('tr');
+
+    const celdaNombre = document.createElement('td');
+    celdaNombre.textContent = cliente.nombreCompleto;
+    const celdaEmail = document.createElement('td');
+    celdaEmail.textContent = cliente.email;
+    fila.appendChild(celdaNombre);
+    fila.appendChild(celdaEmail);
+
+    tabla.appendChild(fila);
+  });
+}
+
+// Parte DOM: re-renderiza el catálogo desde el array libros aplicando
+// coincideTitulo sobre cada entrada. Crea o quita tarjetas dinámicamente.
 function filtrarCatalogo() {
   const campo = document.getElementById('catalogo-busqueda');
   const lista = document.getElementById('catalogo-lista');
+  const sinResultados = document.getElementById('catalogo-sin-resultados');
+  const zonaEstado = document.getElementById('catalogo-resultados');
   if (!campo || !lista) {
     return;
   }
   const busqueda = campo.value;
-  const tarjetas = lista.querySelectorAll('.tarjeta');
-  let visibles = 0;
-
-  tarjetas.forEach(function (tarjeta) {
-    const encabezado = tarjeta.querySelector('.tarjeta__titulo');
-    const titulo = encabezado ? encabezado.textContent : '';
-    const coincide = coincideTitulo(titulo, busqueda);
-    tarjeta.hidden = !coincide;
-    if (coincide) {
-      visibles += 1;
-    }
+  const librosFiltrados = libros.filter(function (libro) {
+    return coincideTitulo(libro.titulo, busqueda);
   });
+  renderCatalogo(librosFiltrados);
 
-  const total = tarjetas.length;
-  const sinResultados = document.getElementById('catalogo-sin-resultados');
+  const visibles = librosFiltrados.length;
+  const total = libros.length;
   if (sinResultados) {
     sinResultados.hidden = !(total > 0 && visibles === 0);
   }
 
-  const zonaEstado = document.getElementById('catalogo-resultados');
   if (zonaEstado) {
     const busquedaVacia = String(busqueda).trim() === '';
     zonaEstado.textContent = textoResultadosCatalogo(visibles, total, busquedaVacia);
@@ -375,6 +525,50 @@ function iniciarFiltroCatalogo() {
   formulario.addEventListener('submit', alEnviarBusqueda);
 }
 
+// ---------------------------------------------------------------------------
+// Persistencia de datos de dominio (C-05): al arrancar, verifica si cada clave
+// de dominio existe en localStorage. Si falta, carga el seed y lo guarda; si
+// existe, usa lo guardado sin mezclar con seed.
+// ---------------------------------------------------------------------------
+function iniciarPersistencia() {
+  const errorPersistencia = document.getElementById('error-persistencia');
+
+  // Libros: usar seed si no hay nada guardado.
+  const librosGuardados = cargar('libreria.libros');
+  if (librosGuardados === null) {
+    // JSON corrupto: usar seed y mostrar error.
+    errorPersistencia.hidden = false;
+    guardar('libreria.libros', libros);
+  } else if (librosGuardados !== undefined && Array.isArray(librosGuardados)) {
+    libros = librosGuardados;
+  } else {
+    guardar('libreria.libros', libros);
+  }
+
+  // Clientes: usar seed si no hay nada guardado.
+  const clientesGuardados = cargar('libreria.clientes');
+  if (clientesGuardados === null) {
+    errorPersistencia.hidden = false;
+    guardar('libreria.clientes', clientes);
+  } else if (clientesGuardados !== undefined && Array.isArray(clientesGuardados)) {
+    clientes = clientesGuardados;
+  } else {
+    guardar('libreria.clientes', clientes);
+  }
+
+  // Ventas: iniciar vacío si no hay nada guardado.
+  const ventasGuardadas = cargar('libreria.ventas');
+  if (ventasGuardadas === null) {
+    errorPersistencia.hidden = false;
+    guardar('libreria.ventas', ventas);
+  } else if (ventasGuardadas !== undefined && Array.isArray(ventasGuardadas)) {
+    ventas = ventasGuardadas;
+  } else {
+    guardar('libreria.ventas', ventas);
+  }
+}
+
+iniciarPersistencia();
 iniciarNavegacion();
 registrarFormulariosMaqueta();
 iniciarTema();
