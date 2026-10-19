@@ -322,6 +322,9 @@ function coincideTitulo(titulo, busqueda) {
 
 // Texto que anuncia la zona de estado #catalogo-resultados (pura, sin DOM).
 function textoResultadosCatalogo(visibles, total, busquedaVacia) {
+  if (total === 0) {
+    return 'Todavía no hay libros en el catálogo.';
+  }
   if (busquedaVacia) {
     return 'Se muestran los ' + total + ' libros.';
   }
@@ -359,11 +362,16 @@ function obtenerTextoGenero(libro) {
 }
 
 function obtenerNombresAutores(ids) {
+  if (!Array.isArray(ids)) {
+    return '';
+  }
   return ids.map(function (id) {
     const autor = autores.find(function (a) {
       return a.id === id;
     });
     return autor ? autor.nombre : '';
+  }).filter(function (nombre) {
+    return nombre !== '';
   }).join(', ');
 }
 
@@ -460,6 +468,11 @@ function renderLibros() {
 
     tabla.appendChild(fila);
   });
+
+  const vacio = document.getElementById('libros-vacio');
+  if (vacio) {
+    vacio.hidden = libros.length > 0;
+  }
 }
 
 // Renderiza el listado de Clientes desde el array clientes (C-04).
@@ -484,6 +497,11 @@ function renderClientes() {
 
     tabla.appendChild(fila);
   });
+
+  const vacio = document.getElementById('clientes-vacio');
+  if (vacio) {
+    vacio.hidden = clientes.length > 0;
+  }
 }
 
 // Parte DOM: re-renderiza el catálogo desde el array libros aplicando
@@ -504,6 +522,10 @@ function filtrarCatalogo() {
 
   const visibles = librosFiltrados.length;
   const total = libros.length;
+  const vacio = document.getElementById('catalogo-vacio');
+  if (vacio) {
+    vacio.hidden = total > 0;
+  }
   if (sinResultados) {
     sinResultados.hidden = !(total > 0 && visibles === 0);
   }
@@ -536,14 +558,19 @@ function iniciarFiltroCatalogo() {
 // de dominio existe en localStorage. Si falta, carga el seed y lo guarda; si
 // existe, usa lo guardado sin mezclar con seed.
 // ---------------------------------------------------------------------------
-function iniciarPersistencia() {
-  const errorPersistencia = document.getElementById('error-persistencia');
+function mostrarErrorPersistencia() {
+  const aviso = document.getElementById('error-persistencia');
+  if (aviso) {
+    aviso.hidden = false;
+  }
+}
 
+function iniciarPersistencia() {
   // Libros: usar seed si no hay nada guardado.
   const librosGuardados = cargar('libreria.libros');
   if (librosGuardados === null) {
     // JSON corrupto: usar seed y mostrar error.
-    errorPersistencia.hidden = false;
+    mostrarErrorPersistencia();
     guardar('libreria.libros', libros);
   } else if (librosGuardados !== undefined && Array.isArray(librosGuardados)) {
     // Se ignoran los elementos con forma inválida (no se reescribe la clave al arrancar).
@@ -555,7 +582,7 @@ function iniciarPersistencia() {
   // Clientes: usar seed si no hay nada guardado.
   const clientesGuardados = cargar('libreria.clientes');
   if (clientesGuardados === null) {
-    errorPersistencia.hidden = false;
+    mostrarErrorPersistencia();
     guardar('libreria.clientes', clientes);
   } else if (clientesGuardados !== undefined && Array.isArray(clientesGuardados)) {
     clientes = clientesGuardados.filter(esClienteGuardadoValido);
@@ -566,7 +593,7 @@ function iniciarPersistencia() {
   // Ventas: iniciar vacío si no hay nada guardado.
   const ventasGuardadas = cargar('libreria.ventas');
   if (ventasGuardadas === null) {
-    errorPersistencia.hidden = false;
+    mostrarErrorPersistencia();
     guardar('libreria.ventas', ventas);
   } else if (ventasGuardadas !== undefined && Array.isArray(ventasGuardadas)) {
     ventas = ventasGuardadas.filter(esVentaGuardadaValida);
