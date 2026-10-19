@@ -28,7 +28,7 @@ Navegador
 
 El flujo de datos es unidireccional y simple: **datos en memoria (arrays) → funciones de render → DOM**. Los eventos del usuario modifican los arrays, se re-renderiza y (en Etapa 2) se persiste en `localStorage`.
 
-Estado actual del repo: `index.html`, `css/styles.css` y `js/app.js` existen pero están **vacíos** (0 líneas).
+Estado actual del repo: `index.html`, `css/styles.css`, `js/data.js`, `js/storage.js` y `js/app.js` implementan C-01 a C-10. El extra C-12 no está hecho.
 
 ## Inspiración visual
 

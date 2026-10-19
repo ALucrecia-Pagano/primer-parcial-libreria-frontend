@@ -11,7 +11,7 @@
 ### IN-02 — Libro repetido en venta: sumar o rechazar
 **Consigna**: "se modifica la cantidad del renglón existente **o** se informa el duplicado".
 **Impacto**: dos comportamientos válidos; el README debe decir cuál se implementó.
-**Resolución propuesta**: decide Etapa 2; documentarlo en el caso manual 4.
+**Resolución**: ✅ resuelta. Se suma la cantidad al renglón existente. No se crea otro renglón. Está documentado en el README («Estado del trabajo» y «Venta e historial»).
 
 ## Preguntas abiertas (priorizadas)
 
@@ -21,10 +21,10 @@
 | ~~Alta~~ ✅ | ~~Contrato de `id`/`name`~~ Resuelta: tabla en [08](08_arquitectura_propuesta.md#tabla-de-contrato-id--name), copiada al README (DD-08) | — | Amanda |
 | ~~Media~~ ✅ | ~~Formato del id de venta~~ Resuelta: `V-0001` (DD-09) | — | Amanda |
 | ~~Media~~ ✅ | ~~Formato de fecha y moneda~~ Resuelta: ISO guardada / `dd/mm/aaaa hh:mm` mostrada; `Intl.NumberFormat('es-AR', ARS)` (DD-10, DD-11) | — | Amanda |
-| Media | ¿Qué hacer si el JSON de `localStorage` está corrupto? (supuesto: volver al seed) | Persistencia | Etapa 2 |
-| Media | ¿Regex de email a usar? (ej. `^[^\s@]+@[^\s@]+\.[^\s@]+$`) | Alta clientes | Etapa 2 |
+| ~~Media~~ ✅ | ~~¿Qué hacer si el JSON de `localStorage` está corrupto?~~ Resuelta: esa clave vuelve al seed y se muestra el aviso de datos corruptos | — | Etapa 2 |
+| ~~Media~~ ✅ | ~~¿Regex de email?~~ Resuelta: `^[^\s@]+@[^\s@]+\.[^\s@]+$`, comparado y guardado en minúsculas | — | Etapa 2 |
 | ~~Baja~~ ✅ | ~~Tema y portadas~~ Resuelta: tema oscuro con contraste suficiente, tapas en CSS (DD-12) | — | Amanda |
 | ~~Baja~~ ✅ | ~~Nombre de la librería~~ Resuelta: **Editorial Codex** (DD-13) | — | Amanda |
 | ~~Baja~~ ✅ | ~~Integrantes~~ Resuelta: Liendo Mateo, Avila Lucas, Pagano Amanda, Valentini Tiziano, Garcia Juan (DD-13) | — | Equipo |
 
-Siguen abiertas para la **Etapa 2**: IN-02, JSON corrupto en `localStorage` y regex de email.
+No quedan preguntas abiertas de la Etapa 2. IN-02, el JSON corrupto y la regex de email quedaron resueltas en el código y en el README.
