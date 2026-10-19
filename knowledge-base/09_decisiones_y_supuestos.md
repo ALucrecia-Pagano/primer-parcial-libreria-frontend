@@ -32,6 +32,7 @@
 **Decisión**: se guarda `toISOString()`; se muestra como `dd/mm/aaaa hh:mm` (hora local).
 
 ### DD-12 — Tema oscuro inspirado en BookNest, tapas en CSS
+**Estado**: Reemplazada parcialmente por DD-15 — solo la parte "inspirado en BookNest"; las tapas en CSS, el contraste WCAG AA y la foto decorativa del banner siguen vigentes.
 **Decisión**: tema oscuro con acentos violeta/índigo inspirado en BookNest, con **contraste suficiente** en todos los textos (objetivo WCAG AA: 4.5:1 en texto normal). **Sin imágenes de portadas**: cada tapa se genera con CSS (degradé + título y autor como texto). **Actualización (2026-10-14, DD-14):** tampoco hay imágenes de fondo; el fondo galáctico también es solo CSS. **Ajuste final de diseño (2026-10-14):** el proyecto suma **una única imagen decorativa**, la foto del banner «Hola, lector» del Catálogo (`assets/img/banner-biblioteca.jpg`), aplicada solo por CSS (sin `<img>`); las tapas siguen siendo solo CSS y su procedencia se registra en el README. **Uso adicional (mismo día):** esa misma foto, muy difuminada y oscurecida, se usa también como fondo de la página en el tema oscuro (detrás del velo galáctico, por CSS); en el tema claro el fondo es el mismo (foto incluida).
 **Justificación**: identidad visual propia; sin recursos externos y con una sola imagen cuya procedencia se documenta en el README (el banner).
 **Trade-offs**: el tema oscuro exige verificar contraste y foco visible.
@@ -55,6 +56,14 @@
 **Ajusta a**: DD-12 — se mantiene y se extiende: las tapas y el fondo son CSS puro. Las dos `portada*.jpg` que se habían agregado al repo (descargadas de Pinterest) se **eliminaron el 2026-10-14** por decisión de Amanda y el fondo pasó a ser CSS puro. **Excepción posterior (ajuste final de diseño, mismo día):** se incorpora la foto decorativa `assets/img/banner-biblioteca.jpg` para el banner del Catálogo, aplicada por CSS; procedencia registrada en el README (foto de Valentin Antonini en Unsplash, Licencia Unsplash). El fondo de página del tema oscuro suma esa misma foto difuminada (`html::before`) bajo la galaxia, sin archivos nuevos. C-12 no debe sumar imágenes de tapas ni de fondo: cualquier otra idea basada en imágenes se resuelve con CSS o se documenta igual que el banner.
 **Trade-offs**: C-02 sigue siendo más grande que el original (CSS más trabajado, JS de presentación y verificación en dos temas, con el contraste calculado contra el tramo más claro de cada degradé), y el `localStorage` se usa ya en Etapa 1, antes del C-05; a cambio, el alcance queda acotado a la consigna.
 
+### DD-15 — La referencia visual es el prototipo propio
+**Decisión** (2026-10-19): la referencia visual del proyecto es el prototipo propio de Editorial Codex, documentado en `docs/inspo/README.md` (capturas y enlace al repositorio https://github.com/ALucrecia-Pagano/Prototipos-Frontend). El prototipo tomó a BookNest como inspiración inicial; la imagen `docs/inspo/inspo-booknest.png` se eliminó del repo.
+**Contexto**: el prototipo aprobado por el grupo (DD-14) ya es la identidad visual implementada; mantener la captura de otra aplicación como "inspo" confundía la referencia. El prototipo citado en DD-14 (`../../prueba_parcial_prog3`) es el mismo que está publicado en el repositorio Prototipos-Frontend (se subió sin la imagen de BookNest y sin la carpeta `.vscode`). DD-14 no se modifica.
+**Alternativas**: (a) conservar la captura de BookNest como referencia (descartada: ya no representa el diseño); (b) marcar DD-12 entera como reemplazada (descartada: dejaría sin decisión vigente las tapas en CSS, que citan `CLAUDE.md`/`AGENTS.md` y DD-14); (c) editar DD-14 (descartada: es historia de C-02 archivado).
+**Justificación**: un único punto de referencia (`docs/inspo/README.md`), trazabilidad conservada y sin tocar el código.
+**Aclaración**: las capturas muestran portadas reales, pero el proyecto **sigue usando tapas generadas con CSS**; la nota de créditos de `docs/inspo/README.md` cubre solo las capturas y no habilita imágenes de portadas en la página.
+**Reemplaza a**: DD-04 (total) y DD-12 (parcial: solo "inspirado en BookNest"; el resto de DD-12 sigue vigente).
+
 ### DD-02 — División en dos etapas por responsable
 **Decisión**: Etapa 1 (Amanda): Ej. 1 + Ej. 2 + filtro por título. Etapa 2 (compañeros): Ej. 3 a 6.
 **Contexto**: indicación del equipo, alineada con la organización de la consigna.
@@ -66,6 +75,7 @@
 **Justificación**: la consigna prohíbe npm/herramientas y evalúa casos manuales reproducibles.
 
 ### DD-04 — Identidad visual inspirada en BookNest
+**Estado**: Reemplazada por DD-15 (la imagen `docs/inspo/inspo-booknest.png` es histórica: ya no está en el repo).
 **Decisión**: tomar de `docs/inspo/inspo-booknest.png` el tono (oscuro, acentos violeta/índigo, tarjetas redondeadas, grilla de portadas, sidebar con ítem activo) adaptándolo a una identidad propia.
 **Trade-offs**: un tema oscuro exige cuidar contraste de texto y foco visible.
 

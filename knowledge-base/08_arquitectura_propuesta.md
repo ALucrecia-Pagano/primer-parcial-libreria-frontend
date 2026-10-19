@@ -24,7 +24,7 @@ tpi-libreria-frontend/
 │   └── app.js              # Etapa 1: filtro por título. Etapa 2 puede dividir en
 │                           # data.js, storage.js, render.js, validators.js, ventas.js
 ├── img/                    # (opcional) recursos locales; registrar procedencia en README
-├── docs/                   # consigna + inspo (fuentes, no se modifican)
+├── docs/                   # consigna (fuente, no se modifica) + inspo/ con el prototipo propio (README)
 ├── knowledge-base/         # esta KB
 ├── openspec/               # specs y changes
 └── README.md

@@ -1,13 +1,13 @@
 # TPI Librería Frontend — Base de Conocimiento
 
-Base de conocimiento generada a partir de `docs/consigna-tpi.pdf` y `docs/inspo/inspo-booknest.png`.
+Base de conocimiento generada a partir de `docs/consigna-tpi.pdf` y, como referencia visual, el prototipo propio (`docs/inspo/README.md`). La KB se generó inicialmente con una captura de BookNest, ya reemplazada (DD-15).
 
 ## Índice de Archivos
 
 | Archivo | Contenido |
 |---|---|
 | [01_vision_y_objetivos.md](01_vision_y_objetivos.md) | Propósito, objetivos, alcance, división en etapas, fuera de alcance |
-| [02_descripcion_general.md](02_descripcion_general.md) | Stack nativo, arquitectura, inspo visual, criterios de evaluación |
+| [02_descripcion_general.md](02_descripcion_general.md) | Stack nativo, arquitectura, referencia visual (prototipo propio), criterios de evaluación |
 | [03_actores_y_roles.md](03_actores_y_roles.md) | Operador, docente, equipo; matriz de operaciones permitidas |
 | [04_modelo_de_datos.md](04_modelo_de_datos.md) | Libro, Editorial, Género, Autor, Cliente, Venta, Renglón; seed; claves localStorage |
 | [05_reglas_de_negocio.md](05_reglas_de_negocio.md) | Reglas RN-CA/LI/CL/FO/VE/HI/PE/UI/GL |

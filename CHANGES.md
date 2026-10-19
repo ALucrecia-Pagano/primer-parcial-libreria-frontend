@@ -231,6 +231,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - `openspec/specs/navegacion-vistas/spec.md`, `openspec/specs/maqueta-vistas/spec.md`
   - Prototipo `../../prueba_parcial_prog3/` (`css/styles.css`, `fonts/`, `img/portada*.jpg`) solo como referencia visual; las imágenes del prototipo no se copian al proyecto
   - `docs/inspo/inspo-booknest.png`
+  - Nota: esa imagen fue reemplazada por el prototipo propio (`docs/inspo/README.md`) en el change `inspo-prototipo-propio` (DD-15).
 
 ---
 

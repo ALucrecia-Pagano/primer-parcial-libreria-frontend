@@ -32,13 +32,13 @@ Estado actual del repo: `index.html`, `css/styles.css` y `js/app.js` existen per
 
 ## Inspiración visual
 
-`docs/inspo/inspo-booknest.png` (BookNest): dashboard de lectura en **modo oscuro** con:
+La referencia visual es el **prototipo propio** de Editorial Codex ([`docs/inspo/README.md`](../docs/inspo/README.md)), que tomó a BookNest como inspiración inicial. Es un dashboard de lectura en **modo oscuro** con:
 - Sidebar vertical con logo, ítems de navegación con ícono y estado activo resaltado (fondo violeta/azul).
 - Tarjetas con bordes redondeados, fondos azul-noche y acentos violeta/índigo (`~#6366f1`).
 - Grilla de portadas de libros en tarjetas con título y autor.
 - Banner/hero con gradiente y tipografía sans-serif limpia.
 
-Es **inspiración**, no un diseño a copiar: la consigna exige identidad visual **propia y coherente**. Ver [09 DD-04](09_decisiones_y_supuestos.md).
+Es **inspiración**, no un diseño a copiar: la consigna exige identidad visual **propia y coherente**. Ver [09 DD-15](09_decisiones_y_supuestos.md) (que reemplaza a DD-04 y, en parte, a DD-12).
 
 **Decidido (DD-12)**: tema oscuro con contraste suficiente en los textos (objetivo WCAG AA 4.5:1) y **sin imágenes de portadas**: las tapas se generan con CSS (degradé con título y autor).
 

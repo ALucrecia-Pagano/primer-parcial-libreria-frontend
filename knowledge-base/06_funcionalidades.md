@@ -25,7 +25,7 @@ Organizadas por épica (≈ ejercicio de la consigna). Cada historia indica la e
 ## Épica 2: Presentación y accesibilidad (Ej. 2) — Etapa 1
 
 ### US-003 — Identidad visual propia
-- [ ] Paleta, tipografía, espaciado, tarjetas, formularios y botones coherentes (inspirados en BookNest, no copiados).
+- [ ] Paleta, tipografía, espaciado, tarjetas, formularios y botones coherentes (inspirados en el prototipo propio, ver `docs/inspo/README.md` y DD-15; no copiados).
 - [ ] CSS externo con clases reutilizables.
 **Reglas**: RN-UI-05/06
 
