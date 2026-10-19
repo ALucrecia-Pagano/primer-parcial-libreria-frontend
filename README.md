@@ -671,6 +671,43 @@ Plantilla para completar **a mano**, en el navegador (sin tests automáticos), d
 | P14 | Recorrido con teclado | Tab / Shift+Tab por la barra, el menú y las 5 vistas, a 320 y 1280 px, en tema oscuro y claro | Orden lógico y foco siempre visible | OK — se observó el resultado esperado | OK |
 | P15 | Consola sin errores | Consola abierta durante P1–P14 | Ningún error | OK — se observó el resultado esperado | OK |
 
+## Verificación manual — C-04 y C-05
+
+Registro de la verificación **a mano**, en el navegador (sin tests automáticos), de las tareas de verificación de los changes archivados `datos-locales-catalogo-dinamico` (C-04) y `persistencia-localstorage` (C-05). Se anota el comportamiento real observado (RN-GL-03); cada fila corresponde a una tarea de su `tasks.md`.
+
+> **Nota:** se verificó sobre la versión actual del código, después del change `correcciones-etapa2`, que ajustó el filtro al volver al Catálogo, el contador «Historias por descubrir», el descarte de elementos inválidos guardados en `localStorage` y `cargar()`.
+
+- **Fecha:** 19/10/2026
+- **Navegador (nombre y versión):** Microsoft Edge (versión no informada)
+- **Apertura:** `file://` (doble clic en `index.html`), partiendo de `localStorage` vacío
+- **Verificado por:** el grupo
+
+| Caso | Pasos | Resultado esperado | Resultado |
+|---|---|---|---|
+| C-04 1.1 | Abrir `index.html` con la consola abierta | `js/data.js` carga sin errores en consola. | OK — se observó el resultado esperado |
+| C-04 1.2 | En consola, inspeccionar `libros`, `editoriales`, `generos`, `autores` y `clientes` | 6 libros (uno sin género), 2 editoriales, 2 géneros, 3 autores y 3 clientes, con ids estables. | OK — se observó el resultado esperado |
+| C-04 2.1 | Abrir el Catálogo | Las tarjetas no vienen escritas en `index.html`: el catálogo se genera desde el array `libros`. | OK — se observó el resultado esperado |
+| C-04 2.2 | Revisar las tarjetas del Catálogo | Cada tarjeta muestra título, ISBN, editorial, género, autores y precio en ARS. | OK — se observó el resultado esperado |
+| C-04 2.3 | Buscar la tarjeta «Manual de jardinería urbana» | Su género dice «Sin clasificar». | OK — se observó el resultado esperado |
+| C-04 3.1 | Escribir en `#catalogo-busqueda` | El catálogo se filtra al escribir, sin recargar la página. | OK — se observó el resultado esperado |
+| C-04 3.2 | Buscar `mapa` | Se ve solo la tarjeta «El mapa invisible». | OK — se observó el resultado esperado |
+| C-04 3.3 | Buscar `xyz` | Se ve el mensaje de sin resultados (`#catalogo-sin-resultados`). | OK — se observó el resultado esperado |
+| C-04 4.1 | Ir a Libros | La tabla muestra 6 filas, una por libro. | OK — se observó el resultado esperado |
+| C-04 4.2 | Ir a Clientes | La tabla muestra 3 filas, una por cliente. | OK — se observó el resultado esperado |
+| C-04 5.1 | Revisar los precios en Catálogo y Libros | Los precios se ven con el formato `$ 1.500,00`. | OK — se observó el resultado esperado |
+| C-04 6.1 | Las 5 vistas a 320 px y 1280 px, solo con teclado y con la consola abierta | Foco visible, sin scroll horizontal de la página y sin errores en consola. | OK — se observó el resultado esperado |
+| C-05 1.1 | Abrir `index.html` con la consola abierta | `js/storage.js` carga sin errores en consola. | OK — se observó el resultado esperado |
+| C-05 1.2 | En consola: `guardar('otra.clave', [1])` | Devuelve `false`: la clave no está en la lista blanca. | OK — se observó el resultado esperado |
+| C-05 1.3 | Abrir la página con el almacenamiento bloqueado (ejecutado en «Verificación manual — correcciones Etapa 2», fila «`cargar()` con almacenamiento bloqueado») | La página sigue funcionando con los datos iniciales. | OK — se observó el resultado esperado |
+| C-05 2.1 | Primer arranque con `localStorage` vacío; revisar DevTools > Application > Local Storage | Se crea `libreria.libros` con los libros iniciales. | OK — se observó el resultado esperado |
+| C-05 2.2 | Mismo arranque; revisar las otras claves | Se crean `libreria.clientes` con los clientes iniciales y `libreria.ventas` como `[]`. | OK — se observó el resultado esperado |
+| C-05 2.3 | Recargar la página tres veces | No se duplican libros, clientes ni ventas. | OK — se observó el resultado esperado |
+| C-05 3.1 | Poner `libreria.libros` en JSON inválido y recargar (ejecutado en «Verificación manual — correcciones Etapa 2», fila «`cargar()` con JSON inválido») | La aplicación no lanza excepción y usa los datos iniciales. | OK — se observó el resultado esperado |
+| C-05 3.2 | Mismo caso que 3.1 | Se ve en pantalla el aviso de datos corruptos, con texto. | OK — se observó el resultado esperado |
+| C-05 4.1 | Arrancar con y sin datos guardados | Los datos se cargan desde `localStorage` o desde los datos iniciales, según corresponda. | OK — se observó el resultado esperado |
+| C-05 5.1 | Leer «Datos de dominio guardados en el navegador (C-05)» | El README explica las claves `libreria.*` y sus límites (navegador, perfil, ubicación). | OK — se observó el resultado esperado |
+| C-05 6.1 | Igual que C-04 6.1 | Foco visible, sin scroll horizontal de la página y sin errores en consola. | OK — se observó el resultado esperado |
+
 ## Verificación manual — correcciones Etapa 2
 
 Plantilla para completar **a mano**, en el navegador (sin tests automáticos), después del change `correcciones-etapa2`. La columna «Resultado» queda **vacía** hasta ejecutar cada caso: se anota el comportamiento real observado, aunque falle (RN-GL-03), y ningún caso se marca aprobado sin ejecutarlo. Los casos 2 a 7 reproducen los de la consigna del TPI.
