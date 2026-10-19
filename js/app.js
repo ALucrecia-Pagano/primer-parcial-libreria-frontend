@@ -574,3 +574,566 @@ registrarFormulariosMaqueta();
 iniciarTema();
 iniciarSidebar();
 iniciarFiltroCatalogo();
+// ==========================================
+// C-06: ALTA DE LIBROS (Fase 5) - por Lucas
+// ==========================================
+
+function poblarFormularioLibro() {
+  const selectEditorial = document.getElementById('libro-editorial');
+  const selectGenero = document.getElementById('libro-genero');
+  const fieldsetAutores = document.getElementById('libro-autores');
+
+  // 1. Cargar Editoriales
+  if (selectEditorial && typeof editoriales !== 'undefined') {
+    selectEditorial.innerHTML = '<option value="">Seleccione una editorial...</option>';
+    editoriales.forEach(ed => {
+      const opt = document.createElement('option');
+      opt.value = ed.id;
+      opt.textContent = ed.nombre;
+      selectEditorial.appendChild(opt);
+    });
+  }
+
+  // 2. Cargar Géneros
+  if (selectGenero && typeof generos !== 'undefined') {
+    selectGenero.innerHTML = '<option value="">Sin clasificar</option>';
+    generos.forEach(gen => {
+      const opt = document.createElement('option');
+      opt.value = gen.id;
+      opt.textContent = gen.nombre;
+      selectGenero.appendChild(opt);
+    });
+  }
+
+  // 3. Cargar Autores (Checkboxes)
+  if (fieldsetAutores && typeof autores !== 'undefined') {
+    fieldsetAutores.innerHTML = '<legend>Autores (*)</legend>';
+    autores.forEach(aut => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.name = 'autorIds';
+      input.value = aut.id;
+      
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(` ${aut.nombre}`));
+      fieldsetAutores.appendChild(label);
+    });
+  }
+}
+// Función auxiliar para sacarle espacios y guiones al ISBN
+function normalizarIsbn(isbn) {
+  return String(isbn || '').replace(/[\s-]/g, '').toLowerCase();
+}
+
+// Función pura de validación
+function validarLibro(datos, listaLibros, listaEditoriales, listaGeneros, listaAutores) {
+  const errores = [];
+
+  // 1. Título obligatorio
+  if (!datos.titulo || datos.titulo.trim() === '') {
+    errores.push('El título es obligatorio.');
+  }
+
+  // 2. ISBN obligatorio y único
+  const isbnLimpio = normalizarIsbn(datos.isbn);
+  if (!isbnLimpio) {
+    errores.push('El ISBN es obligatorio.');
+  } else {
+    const isbnExiste = listaLibros.some(l => normalizarIsbn(l.isbn) === isbnLimpio);
+    if (isbnExiste) {
+      errores.push('El ISBN ya se encuentra registrado.');
+    }
+  }
+
+  // 3. Precio numérico mayor a cero
+  const precioNum = Number(datos.precio);
+  if (isNaN(precioNum) || precioNum <= 0) {
+    errores.push('El precio debe ser un número mayor a cero.');
+  }
+
+  // 4. Editorial existente
+  if (!datos.editorialId || !listaEditoriales.some(e => e.id === datos.editorialId)) {
+    errores.push('Debe seleccionar una editorial válida.');
+  }
+
+  // 5. Al menos 1 autor
+  if (!Array.isArray(datos.autorIds) || datos.autorIds.length === 0) {
+    errores.push('Debe seleccionar al menos un autor.');
+  }
+
+  // 6. Género opcional (pero si mandan uno, debe existir)
+  if (datos.generoId && !listaGeneros.some(g => g.id === datos.generoId)) {
+    errores.push('El género seleccionado no es válido.');
+  }
+
+  return errores;
+}
+// Función para manejar el envío del formulario de libros
+function registrarHandlerAltaLibro() {
+  const form = document.getElementById('form-libro');
+  if (!form) return;
+
+  // Removemos el handler genérico de la maqueta si es que estaba
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const divErrores = document.getElementById('libro-errores');
+    const divMensaje = document.getElementById('libro-mensaje');
+
+    // Ocultar y limpiar mensajes previos
+    if (divErrores) {
+      divErrores.hidden = true;
+      divErrores.innerHTML = '';
+    }
+    if (divMensaje) {
+      divMensaje.hidden = true;
+      divMensaje.textContent = '';
+    }
+
+    // 1. Recolectar datos del formulario
+    const titulo = document.getElementById('libro-titulo').value;
+    const isbn = document.getElementById('libro-isbn').value;
+    const precio = document.getElementById('libro-precio').value;
+    const editorialId = document.getElementById('libro-editorial').value;
+    const generoId = document.getElementById('libro-genero').value || null;
+
+    const autorCheckboxes = form.querySelectorAll('input[name="autorIds"]:checked');
+    const autorIds = Array.from(autorCheckboxes).map(cb => cb.value);
+
+    const datosForm = { titulo, isbn, precio, editorialId, generoId, autorIds };
+
+    // 2. Validar
+    const errores = validarLibro(datosForm, libros, editoriales, generos, autores);
+
+    if (errores.length > 0) {
+      // Mostrar errores
+      const ul = document.createElement('ul');
+      errores.forEach(err => {
+        const li = document.createElement('li');
+        li.textContent = err;
+        ul.appendChild(li);
+      });
+      divErrores.appendChild(ul);
+      divErrores.hidden = false;
+      return; // Cortamos acá, no se guarda nada
+    }
+
+    // 3. Crear el libro nuevo
+    const nuevoLibro = {
+      id: 'lib-' + Date.now(), // Generamos un ID simple
+      titulo: titulo.trim(),
+      isbn: isbn.trim(),
+      precio: Number(precio),
+      editorialId: editorialId,
+      generoId: generoId,
+      autorIds: autorIds
+    };
+
+    // 4. Guardar en el array y en localStorage (asumiendo que Mateo hizo la función guardar en C-05)
+    libros.push(nuevoLibro);
+    if (typeof guardar === 'function') {
+      guardar('libreria.libros', libros);
+    } else {
+      localStorage.setItem('libreria.libros', JSON.stringify(libros));
+    }
+
+    // 5. Mostrar éxito y resetear formulario
+    if (divMensaje) {
+      divMensaje.textContent = 'Libro registrado con éxito.';
+      divMensaje.hidden = false;
+    }
+    form.reset();
+
+    // 6. Refrescar las vistas si las funciones de Mateo de C-04 ya existen
+    if (typeof renderTablaLibros === 'function') renderTablaLibros();
+    if (typeof renderCatalogo === 'function') renderCatalogo();
+  });
+}
+
+// ==========================================
+// INICIALIZADOR
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+  poblarFormularioLibro();
+  registrarHandlerAltaLibro();
+  registrarHandlerAltaCliente();
+  poblarSelectoresVenta();
+  registrarHandlerAgregarDetalle();
+  renderTablaDetalleVenta();
+  registrarHandlerConfirmarVenta();
+  renderHistorialVentas();
+});
+// ==========================================
+// C-07: ALTA DE CLIENTES (Fase 5) - por Lucas
+// ==========================================
+
+// Función pura de validación de clientes
+function validarCliente(datos, listaClientes) {
+  const errores = [];
+
+  // 1. Nombre obligatorio
+  if (!datos.nombreCompleto || datos.nombreCompleto.trim() === '') {
+    errores.push('El nombre completo es obligatorio.');
+  }
+
+  // 2. Email obligatorio, con formato válido y único
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailLimpio = String(datos.email || '').trim().toLowerCase();
+
+  if (!emailLimpio) {
+    errores.push('El email es obligatorio.');
+  } else if (!emailRegex.test(emailLimpio)) {
+    errores.push('El formato del email no es válido.');
+  } else {
+    // Validar que no exista
+    const emailExiste = listaClientes.some(c => c.email.trim().toLowerCase() === emailLimpio);
+    if (emailExiste) {
+      errores.push('El email ya se encuentra registrado.');
+    }
+  }
+
+  return errores;
+}
+// Función para manejar el envío del formulario de clientes
+function registrarHandlerAltaCliente() {
+  const form = document.getElementById('form-cliente');
+  if (!form) return;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const divErrores = document.getElementById('cliente-errores');
+    const divMensaje = document.getElementById('cliente-mensaje');
+
+    // Limpiar mensajes previos
+    if (divErrores) {
+      divErrores.hidden = true;
+      divErrores.innerHTML = '';
+    }
+    if (divMensaje) {
+      divMensaje.hidden = true;
+      divMensaje.textContent = '';
+    }
+
+    // 1. Recolectar datos
+    const nombreCompleto = document.getElementById('cliente-nombre').value;
+    const email = document.getElementById('cliente-email').value;
+
+    const datosForm = { nombreCompleto, email };
+
+    // 2. Validar
+    const errores = validarCliente(datosForm, clientes);
+
+    if (errores.length > 0) {
+      // Mostrar errores
+      const ul = document.createElement('ul');
+      errores.forEach(err => {
+        const li = document.createElement('li');
+        li.textContent = err;
+        ul.appendChild(li);
+      });
+      divErrores.appendChild(ul);
+      divErrores.hidden = false;
+      return;
+    }
+
+    // 3. Crear cliente nuevo
+    const nuevoCliente = {
+      id: 'cli-' + Date.now(),
+      nombreCompleto: nombreCompleto.trim(),
+      email: email.trim().toLowerCase()
+    };
+
+    // 4. Guardar
+    clientes.push(nuevoCliente);
+    if (typeof guardar === 'function') {
+      guardar('libreria.clientes', clientes);
+    } else {
+      localStorage.setItem('libreria.clientes', JSON.stringify(clientes));
+    }
+
+    // 5. Notificar éxito y limpiar
+    if (divMensaje) {
+      divMensaje.textContent = 'Cliente registrado con éxito.';
+      divMensaje.hidden = false;
+    }
+    form.reset();
+
+    // 6. Refrescar tablas
+    if (typeof renderTablaClientes === 'function') renderTablaClientes();
+    if (typeof poblarSelectoresVenta === 'function') poblarSelectoresVenta();
+  });
+}
+// ==========================================
+// C-08: COMPOSICIÓN DE VENTA - por Lucas
+// ==========================================
+
+// 1. Variable global temporal para guardar los libros que el usuario va agregando
+let detalleVentaActual = [];
+
+// 2. Función para cargar las listas desplegables de Clientes y Libros
+function poblarSelectoresVenta() {
+  // Nota: Asumo que los IDs en tu index.html son 'venta-cliente' y 'venta-libro'. 
+  // Si no llega a cargar, revisamos el HTML.
+  const selectClienteVenta = document.getElementById('venta-cliente');
+  const selectLibroVenta = document.getElementById('venta-libro');
+
+  // Llenar selector de Clientes
+  if (selectClienteVenta && typeof clientes !== 'undefined') {
+    selectClienteVenta.innerHTML = '<option value="">Seleccione un cliente...</option>';
+    clientes.forEach(cli => {
+      const opt = document.createElement('option');
+      opt.value = cli.id;
+      // Mostramos nombre y email para evitar confusiones
+      opt.textContent = `${cli.nombreCompleto} (${cli.email})`;
+      selectClienteVenta.appendChild(opt);
+    });
+  }
+
+  // Llenar selector de Libros
+  if (selectLibroVenta && typeof libros !== 'undefined') {
+    selectLibroVenta.innerHTML = '<option value="">Seleccione un libro...</option>';
+    libros.forEach(lib => {
+      const opt = document.createElement('option');
+      opt.value = lib.id;
+      // Mostramos título y precio para que el cajero vea el valor
+      opt.textContent = `${lib.titulo} - $${lib.precio}`;
+      selectLibroVenta.appendChild(opt);
+    });
+  }
+}
+// 3. Manejar el clic en "Agregar renglón" al detalle
+function registrarHandlerAgregarDetalle() {
+  const btnAgregar = document.getElementById('venta-agregar');
+  if (!btnAgregar) return;
+
+  btnAgregar.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const selectLibro = document.getElementById('venta-libro');
+    const inputCantidad = document.getElementById('venta-cantidad');
+    
+    // Como no hay un div específico para errores del detalle, usamos un alert simple para no ensuciar el HTML
+    const libroId = selectLibro.value;
+    const cantidad = parseInt(inputCantidad.value);
+
+    // Validaciones simples
+    if (!libroId) {
+      alert('Debe seleccionar un libro.');
+      return;
+    }
+    if (isNaN(cantidad) || cantidad <= 0) {
+      alert('La cantidad debe ser mayor a cero.');
+      return;
+    }
+
+    // Buscamos el libro en nuestro array general
+    const libro = libros.find(l => l.id === libroId);
+    if (!libro) return;
+
+    // Chequear si el libro ya está en el detalle temporal
+    const detalleExistente = detalleVentaActual.find(d => d.libroId === libroId);
+    if (detalleExistente) {
+      // Si ya está, le sumamos la cantidad
+      detalleExistente.cantidad += cantidad;
+      detalleExistente.subtotal = detalleExistente.cantidad * libro.precio;
+    } else {
+      // Si es nuevo, lo agregamos al array temporal
+      detalleVentaActual.push({
+        libroId: libro.id,
+        titulo: libro.titulo,
+        precioUnitario: libro.precio,
+        cantidad: cantidad,
+        subtotal: cantidad * libro.precio
+      });
+    }
+
+    // Limpiar inputs (opcional, dejamos la cantidad en 1 por comodidad)
+    selectLibro.value = '';
+    inputCantidad.value = '1';
+
+    // Refrescar la tabla del carrito
+    renderTablaDetalleVenta();
+  });
+}
+
+// 4. Dibujar la tabla del carrito temporal
+function renderTablaDetalleVenta() {
+  const tbody = document.getElementById('venta-renglones');
+  const spanTotal = document.getElementById('venta-total'); 
+  const pVacio = document.getElementById('venta-renglones-vacio');
+  
+  if (!tbody) return;
+  tbody.innerHTML = ''; // Limpiamos la maqueta
+
+  let totalVenta = 0;
+
+  if (detalleVentaActual.length === 0) {
+    if (pVacio) pVacio.hidden = false;
+    if (spanTotal) spanTotal.innerHTML = '$&nbsp;0,00';
+    return;
+  } else {
+    if (pVacio) pVacio.hidden = true;
+  }
+
+  detalleVentaActual.forEach((det, index) => {
+    totalVenta += det.subtotal;
+
+    const tr = document.createElement('tr');
+    
+    tr.innerHTML = `
+      <td>${det.titulo}</td>
+      <td>${det.cantidad}</td>
+      <td>$&nbsp;${det.precioUnitario.toFixed(2).replace('.', ',')}</td>
+      <td>$&nbsp;${det.subtotal.toFixed(2).replace('.', ',')}</td>
+      <td><button class="boton boton--secundario btn-quitar" type="button" data-index="${index}">Quitar</button></td>
+    `;
+    
+    tbody.appendChild(tr);
+  });
+
+  // Evento para los botones "Quitar" de la tablita temporal
+  const botonesQuitar = tbody.querySelectorAll('.btn-quitar');
+  botonesQuitar.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = this.getAttribute('data-index');
+      detalleVentaActual.splice(idx, 1); // Lo borramos del array temporal
+      renderTablaDetalleVenta(); // Redibujamos
+    });
+  });
+
+  // Mostrar el total formateado
+  if (spanTotal) {
+    spanTotal.innerHTML = `$&nbsp;${totalVenta.toFixed(2).replace('.', ',')}`;
+  }
+}
+// ==========================================
+// C-09: CONFIRMACIÓN DE VENTA - por Lucas
+// ==========================================
+
+function registrarHandlerConfirmarVenta() {
+  const formVenta = document.getElementById('form-venta');
+  if (!formVenta) return;
+
+  formVenta.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const selectCliente = document.getElementById('venta-cliente');
+    const divErrores = document.getElementById('venta-errores');
+    const divMensaje = document.getElementById('venta-mensaje');
+
+    // 1. Limpiar mensajes previos
+    if (divErrores) {
+      divErrores.hidden = true;
+      divErrores.innerHTML = '';
+    }
+    if (divMensaje) {
+      divMensaje.hidden = true;
+      divMensaje.textContent = '';
+    }
+
+    const clienteId = selectCliente.value;
+
+    // 2. Validar antes de guardar
+    const errores = [];
+    if (!clienteId) errores.push('Debe seleccionar un cliente para la venta.');
+    if (detalleVentaActual.length === 0) errores.push('Error: agregá al menos un libro a la venta.');
+
+    if (errores.length > 0) {
+      if (divErrores) {
+        divErrores.innerHTML = '<p>' + errores.join('<br>') + '</p>';
+        divErrores.hidden = false;
+      }
+      return;
+    }
+
+    // 3. Crear el objeto de la venta final
+    // Calculamos el total recorriendo el carrito
+    const totalVenta = detalleVentaActual.reduce((acc, det) => acc + det.subtotal, 0);
+    
+    // Generamos un ID provisorio (ej: V-17290000)
+    const nuevoId = 'V-' + Math.floor(Date.now() / 1000); 
+
+    const nuevaVenta = {
+      id: nuevoId,
+      fecha: new Date().toISOString(),
+      clienteId: clienteId,
+      detalle: [...detalleVentaActual], // Hacemos una copia del carrito
+      total: totalVenta
+    };
+
+    // 4. Guardar la venta en el sistema
+    // Asumimos que existe un array global 'ventas' (si no existe lo creamos vacío para no romper)
+    if (typeof ventas === 'undefined') {
+      window.ventas = [];
+    }
+    
+    ventas.push(nuevaVenta);
+    
+    if (typeof guardar === 'function') {
+      guardar('libreria.ventas', ventas);
+    } else {
+      localStorage.setItem('libreria.ventas', JSON.stringify(ventas));
+    }
+
+    // 5. Mostrar éxito y resetear todo
+    if (divMensaje) {
+      divMensaje.textContent = `Venta ${nuevaVenta.id} registrada correctamente.`;
+      divMensaje.hidden = false;
+    }
+
+    // Vaciamos el carrito y reseteamos la pantalla
+    detalleVentaActual = [];
+    formVenta.reset();
+    renderTablaDetalleVenta();
+    
+    // 6. Refrescar el historial de ventas si ya existe esa función (C-10)
+    if (typeof renderHistorialVentas === 'function') {
+      renderHistorialVentas();
+    }
+  });
+}
+// ==========================================
+// C-10: HISTORIAL DE VENTAS - por Lucas
+// ==========================================
+
+function renderHistorialVentas() {
+  // ATENCIÓN: Pongo estos IDs por defecto, pero si en tu index.html 
+  // se llaman distinto, cambialos acá para que coincidan.
+  const tbody = document.getElementById('historial-renglones'); 
+  const pVacio = document.getElementById('historial-vacio'); 
+
+  if (!tbody) return;
+  tbody.innerHTML = ''; // Limpiamos la maqueta
+
+  // Si no hay ventas registradas
+  if (typeof ventas === 'undefined' || ventas.length === 0) {
+    if (pVacio) pVacio.hidden = false;
+    return;
+  } else {
+    if (pVacio) pVacio.hidden = true;
+  }
+
+  // Recorremos el array de ventas globales y armamos las filas
+  ventas.forEach(venta => {
+    // Buscamos el nombre del cliente real para que no se vea solo un código raro
+    const cliente = typeof clientes !== 'undefined' ? clientes.find(c => c.id === venta.clienteId) : null;
+    const nombreCliente = cliente ? cliente.nombreCompleto : venta.clienteId;
+
+    // Formateamos un poco la fecha para que se vea prolija
+    const fechaObj = new Date(venta.fecha);
+    const fechaFormateada = fechaObj.toLocaleDateString() + ' ' + fechaObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${venta.id}</td>
+      <td>${fechaFormateada}</td>
+      <td>${nombreCliente}</td>
+      <td>${venta.detalle.length}</td>
+      <td>$&nbsp;${venta.total.toFixed(2).replace('.', ',')}</td>
+    `;
+    
+    tbody.appendChild(tr);
+  });
+}

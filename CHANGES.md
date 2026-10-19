@@ -27,7 +27,7 @@ División por etapas y responsables:
 | Etapa | Responsable(s) | Changes |
 |-------|----------------|---------|
 | **Etapa 1** | Pagano Amanda | C-01 a C-03 (Ej. 1 + Ej. 2 + filtro por título adelantado del Ej. 3) |
-| **Etapa 2** | Equipo (responsables a definir) | C-04 a C-11 (resto del Ej. 3, Ej. 4, Ej. 5 y Ej. 6) |
+| **Etapa 2** | Mateo Liendo (C-04 y C-05); Lucas Avila (C-06 a C-10); todo el equipo (C-11) | C-04 a C-11 (resto del Ej. 3, Ej. 4, Ej. 5 y Ej. 6) |
 | **Opcional** | A definir | C-12 (extras del prototipo; no forma parte de los 11 changes obligatorios) |
 
 Integrantes del grupo (para el README): Liendo Mateo, Avila Lucas, Pagano Amanda, Valentini Tiziano, Garcia Juan (DD-13).
@@ -42,15 +42,15 @@ C-01 estructura-html-navegacion                 (Ej. 1; contrato id/name)
  └── C-02 estilos-responsive-accesibilidad      (Ej. 2)
       └── C-03 filtro-titulo-readme-avance      (Ej. 3 adelantado + entrega de avance)
 
-ETAPA 2 — Equipo (responsables a definir); requiere contrato de C-01 y coincideTitulo de C-03
+ETAPA 2 — Mateo Liendo (C-04 y C-05), Lucas Avila (C-06 a C-10), todo el equipo (C-11); requiere contrato de C-01 y coincideTitulo de C-03
 C-01 + C-03
  └── C-04 datos-locales-catalogo-dinamico
       └── C-05 persistencia-localstorage
-           ├── C-06 alta-libros
-           ├── C-07 alta-clientes
-           └── C-08 composicion-venta
-                └── C-09 confirmacion-venta
-                     └── C-10 historial-ventas
+           ├── C-06 alta-libros (Lucas Avila)
+           ├── C-07 alta-clientes (Lucas Avila)
+           └── C-08 composicion-venta (Lucas Avila)
+                └── C-09 confirmacion-venta (Lucas Avila)
+                     └── C-10 historial-ventas (Lucas Avila)
 C-06 + C-07 + C-10
  └── C-11 casos-manuales-readme-final
       └── C-12 extras-prototipo   (OPCIONAL, posterior a la Etapa 2)
@@ -69,21 +69,21 @@ GATE 2: C-02 ✓   (ENTREGA ETAPA 1 al cerrar C-03)
   → C-03 filtro-titulo-readme-avance              [Etapa 1 — Amanda]
 
 GATE 3: C-01 ✓ + C-03 ✓   (Etapa 2 arranca tras la entrega de Etapa 1)
-  → C-04 datos-locales-catalogo-dinamico          [Etapa 2 — responsable a definir]
+  → C-04 datos-locales-catalogo-dinamico          [Etapa 2 — Mateo Liendo]
 
 GATE 4: C-04 ✓
-  → C-05 persistencia-localstorage                [Etapa 2 — responsable a definir]
+  → C-05 persistencia-localstorage                [Etapa 2 — Mateo Liendo]
 
 GATE 5: C-05 ✓                                    ← FORK (3 ramas paralelas)
-  → C-06 alta-libros                              [Etapa 2 — responsable a definir]
-  → C-07 alta-clientes                            [Etapa 2 — responsable a definir]
-  → C-08 composicion-venta                        [Etapa 2 — responsable a definir]
+  → C-06 alta-libros                              [Etapa 2 — Lucas Avila]
+  → C-07 alta-clientes                            [Etapa 2 — Lucas Avila]
+  → C-08 composicion-venta                        [Etapa 2 — Lucas Avila]
 
 GATE 6: C-08 ✓
-  → C-09 confirmacion-venta                       [Etapa 2 — responsable a definir]
+  → C-09 confirmacion-venta                       [Etapa 2 — Lucas Avila]
 
 GATE 7: C-09 ✓
-  → C-10 historial-ventas                         [Etapa 2 — responsable a definir]
+  → C-10 historial-ventas                         [Etapa 2 — Lucas Avila]
 
 GATE 8: C-06 ✓ + C-07 ✓ + C-10 ✓
   → C-11 casos-manuales-readme-final              [todo el equipo de Etapa 2]
@@ -112,15 +112,15 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 | 2 | C-02 estilos-responsive-accesibilidad |
 | 3 | C-03 filtro-titulo-readme-avance (commit de cierre de Etapa 1) |
 
-**Etapa 2** (orden recomendado, sin nombres):
+**Etapa 2** (orden recomendado por responsable):
 
 | Paso | Frente 1 | Frente 2 | Frente 3 |
 |------|----------|----------|----------|
-| 1 | C-04 datos-locales-catalogo-dinamico | — | — |
-| 2 | C-05 persistencia-localstorage | — | — |
-| 3 | C-08 composicion-venta | C-06 alta-libros | C-07 alta-clientes |
-| 4 | C-09 confirmacion-venta | — | — |
-| 5 | C-10 historial-ventas | (apoyo: casos manuales 2 y 7) | (apoyo: casos manuales 3 y 7) |
+| 1 | C-04 datos-locales-catalogo-dinamico (Mateo Liendo) | — | — |
+| 2 | C-05 persistencia-localstorage (Mateo Liendo) | — | — |
+| 3 | C-08 composicion-venta (Lucas Avila) | C-06 alta-libros (Lucas Avila) | C-07 alta-clientes (Lucas Avila) |
+| 4 | C-09 confirmacion-venta (Lucas Avila) | — | — |
+| 5 | C-10 historial-ventas (Lucas Avila) | (apoyo: casos manuales 2 y 7) | (apoyo: casos manuales 3 y 7) |
 | 6 | C-11 casos-manuales-readme-final (todo el equipo) | C-11 | C-11 |
 
 ---
@@ -271,7 +271,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 
 ---
 
-## ETAPA 2 — Equipo (responsables a definir)
+## ETAPA 2 — Mateo Liendo (C-04 y C-05), Lucas Avila (C-06 a C-10) y todo el equipo (C-11)
 
 > Prerrequisito de toda la Etapa 2: leer el contrato `id`/`name` (README, copiado en C-01). **No renombrar ids ni names**; si hace falta cambiarlos, se actualizan HTML y README a la vez y se avisa al equipo.
 > Si se divide `js/app.js` (`data.js`, `storage.js`, `render.js`, `validators.js`, `ventas.js`), cargar con `<script defer>` en orden y sin módulos ES (SU-02).
@@ -335,7 +335,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ### [C-06] `alta-libros`
 - **Estado**: `[ ]` pendiente
 - **Ejercicio**: Ej. 4 — Altas con validación (libros)
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
   - Opciones de `#libro-editorial`, `#libro-genero` (con «Sin clasificar» `value=""`) y checkboxes `libro-autores` generadas desde los arrays (RN-LI-07)
   - Validador puro `validarLibro(datos, libros, ...)` → lista de errores: título/ISBN no vacíos, ISBN único sin espacios ni guiones, precio numérico > 0, editorial existente, >= 1 autor existente, género opcional (RN-LI-01..06)
@@ -357,7 +357,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ### [C-07] `alta-clientes`
 - **Estado**: `[ ]` pendiente
 - **Ejercicio**: Ej. 4 — Altas con validación (clientes)
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
   - Validador puro `validarCliente(datos, clientes)`: nombre y email no vacíos, formato de email, email único con `trim()` + minúsculas (RN-CL-01..03)
   - **Decisión a tomar (no bloqueante)**: regex de email; sugerida `^[^\s@]+@[^\s@]+\.[^\s@]+$`; documentarla en el README
@@ -378,7 +378,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ### [C-08] `composicion-venta`
 - **Estado**: `[ ]` pendiente
 - **Ejercicio**: Ej. 5 — Ventas (composición)
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
   - Selectores `venta-cliente` y `venta-libro` generados desde los arrays (RN-VE-01)
   - Estado en memoria del borrador de venta (renglones) y render de `venta-renglones`: libro, cantidad editable, precio unitario, subtotal, botón "quitar" (RN-VE-04)
@@ -407,7 +407,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ### [C-09] `confirmacion-venta`
 - **Estado**: `[ ]` pendiente
 - **Ejercicio**: Ej. 5 — Ventas (confirmación)
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
   - `submit`/clic en `#venta-confirmar` con `preventDefault`; rechaza sin cliente, sin renglones o con cantidades inválidas, con mensaje de texto (RN-VE-06)
   - Crea la venta `{id: 'V-0001'..., fecha: toISOString(), clienteId, clienteNombre, renglones[{libroId, titulo, cantidad, precioUnitario, subtotal}], total}` (RN-VE-07)
@@ -430,7 +430,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ### [C-10] `historial-ventas`
 - **Estado**: `[ ]` pendiente
 - **Ejercicio**: Ej. 5 — Historial de ventas
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
   - Render de `historial-tabla` desde `ventas`: id, fecha `dd/mm/aaaa hh:mm`, cliente, total ARS (US-010, RN-HI-01)
   - Acción "Ver detalle" (botón accesible por teclado) que llena `historial-detalle` con los renglones **guardados** en la venta: título, cantidad, precio unitario histórico, subtotal (RN-HI-02, RN-HI-04)
@@ -521,11 +521,11 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 | C-03 | `filtro-titulo-readme-avance` | 1 | Ej. 3 (filtro adelantado) + avance | Pagano Amanda | MEDIO | C-01, C-02 |
 | C-04 | `datos-locales-catalogo-dinamico` | 2 | Ej. 3 | Mateo Liendo | ALTO | C-01, C-03 |
 | C-05 | `persistencia-localstorage` | 2 | Ej. 6 | Mateo Liendo | ALTO | C-04 |
-| C-06 | `alta-libros` | 2 | Ej. 4 | A definir | MEDIO | C-05 |
-| C-07 | `alta-clientes` | 2 | Ej. 4 | A definir | MEDIO | C-05 |
-| C-08 | `composicion-venta` | 2 | Ej. 5 | A definir | MEDIO | C-05 |
-| C-09 | `confirmacion-venta` | 2 | Ej. 5 | A definir | ALTO | C-08 |
-| C-10 | `historial-ventas` | 2 | Ej. 5 | A definir | MEDIO | C-09 |
+| C-06 | `alta-libros` | 2 | Ej. 4 | Lucas Avila | MEDIO | C-05 |
+| C-07 | `alta-clientes` | 2 | Ej. 4 | Lucas Avila | MEDIO | C-05 |
+| C-08 | `composicion-venta` | 2 | Ej. 5 | Lucas Avila | MEDIO | C-05 |
+| C-09 | `confirmacion-venta` | 2 | Ej. 5 | Lucas Avila | ALTO | C-08 |
+| C-10 | `historial-ventas` | 2 | Ej. 5 | Lucas Avila | MEDIO | C-09 |
 | C-11 | `casos-manuales-readme-final` | 2 | Ej. 6 | A definir | BAJO | C-06, C-07, C-10 |
 | C-12 | `extras-prototipo` (opcional) | Extra | Extras del prototipo (DD-14) | A definir | MEDIO | C-11 |
 
