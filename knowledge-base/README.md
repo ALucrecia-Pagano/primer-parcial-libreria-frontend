@@ -1,6 +1,6 @@
 # TPI Librería Frontend — Base de Conocimiento
 
-Base de conocimiento generada a partir de `docs/consigna-tpi.pdf` y, como referencia visual, el prototipo propio (`docs/inspo/README.md`). La KB se generó inicialmente con una captura de BookNest, ya reemplazada (DD-15).
+Base de conocimiento generada a partir de la consigna del TPI (el PDF se retiró del repo al cerrar el trabajo) y, como referencia visual, el prototipo propio (`docs/inspo/README.md`). La KB se generó inicialmente con una captura de BookNest, ya reemplazada (DD-15).
 
 ## Índice de Archivos
 

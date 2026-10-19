@@ -2,7 +2,7 @@ schema: spec-driven
 
 context: |
   TPI "Frontend de una librería", Programación III, UTN FRM.
-  Consigna: docs/consigna-tpi.pdf. Reglas duras: AGENTS.md.
+  Consigna: retirada del repo al cerrar el TPI (antes docs/consigna-tpi.pdf). Reglas duras: AGENTS.md.
   Conocimiento del dominio: knowledge-base/. Roadmap: CHANGES.md.
   Todos los artefactos se escriben en español.
   Solo HTML, CSS y JavaScript nativos: sin librerías, frameworks, CDNs,

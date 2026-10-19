@@ -1,6 +1,6 @@
 # Visión y Objetivos
 
-> Fuente: `docs/consigna-tpi.pdf` (TPI "Frontend de una librería", Programación III, UTN FRM — Prof. Matías Torres).
+> Fuente: consigna del TPI "Frontend de una librería", Programación III, UTN FRM — Prof. Matías Torres. El PDF se retiró del repo al cerrar el trabajo.
 
 ## Propósito del sistema
 

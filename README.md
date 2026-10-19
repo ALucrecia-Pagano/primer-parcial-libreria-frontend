@@ -17,7 +17,7 @@ Trabajo Práctico Integrador de Programación III (UTN FRM): frontend estático 
 
 La consigna obligatoria está implementada: catálogo, filtro por título, altas de libros y clientes, venta, historial y persistencia en `localStorage` (C-01 a C-10). Queda fuera de la entrega el extra C-12 (inicio, escritores, detalle con estrellas, ingresar y registro).
 
-C-11 (casos manuales y README final) lo cerraron Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat).
+C-11 (casos manuales y README final) lo cerraron Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat). La consigna en PDF se retiró del repo al cerrar el trabajo.
 
 | Tema | Dónde está |
 |---|---|
