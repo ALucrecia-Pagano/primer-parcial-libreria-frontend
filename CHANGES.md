@@ -27,7 +27,7 @@ División por etapas y responsables:
 | Etapa | Responsable(s) | Changes |
 |-------|----------------|---------|
 | **Etapa 1** | Pagano Amanda | C-01 a C-03 (Ej. 1 + Ej. 2 + filtro por título adelantado del Ej. 3) |
-| **Etapa 2** | Mateo Liendo (C-04 y C-05); Lucas Avila (C-06 a C-10); todo el equipo (C-11) | C-04 a C-11 (resto del Ej. 3, Ej. 4, Ej. 5 y Ej. 6) |
+| **Etapa 2** | Mateo Liendo (C-04 y C-05); Lucas Avila (C-06 a C-10); Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat) (C-11) | C-04 a C-11 (resto del Ej. 3, Ej. 4, Ej. 5 y Ej. 6) |
 | **Opcional** | A definir | C-12 (extras del prototipo; no forma parte de los 11 changes obligatorios) |
 
 Integrantes del grupo (para el README): Liendo Mateo, Avila Lucas, Pagano Amanda, Valentini Tiziano, Garcia Juan (DD-13).
@@ -42,7 +42,7 @@ C-01 estructura-html-navegacion                 (Ej. 1; contrato id/name)
  └── C-02 estilos-responsive-accesibilidad      (Ej. 2)
       └── C-03 filtro-titulo-readme-avance      (Ej. 3 adelantado + entrega de avance)
 
-ETAPA 2 — Mateo Liendo (C-04 y C-05), Lucas Avila (C-06 a C-10), todo el equipo (C-11); requiere contrato de C-01 y coincideTitulo de C-03
+ETAPA 2 — Mateo Liendo (C-04 y C-05), Lucas Avila (C-06 a C-10), Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat) (C-11); requiere contrato de C-01 y coincideTitulo de C-03
 C-01 + C-03
  └── C-04 datos-locales-catalogo-dinamico
       └── C-05 persistencia-localstorage
@@ -86,7 +86,7 @@ GATE 7: C-09 ✓
   → C-10 historial-ventas                         [Etapa 2 — Lucas Avila]
 
 GATE 8: C-06 ✓ + C-07 ✓ + C-10 ✓
-  → C-11 casos-manuales-readme-final              [todo el equipo de Etapa 2]
+  → C-11 casos-manuales-readme-final              [Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat)]
 
 GATE 9 (opcional): C-11 ✓
   → C-12 extras-prototipo                         [opcional — responsable a definir]
@@ -121,7 +121,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 | 3 | C-08 composicion-venta (Lucas Avila) | C-06 alta-libros (Lucas Avila) | C-07 alta-clientes (Lucas Avila) |
 | 4 | C-09 confirmacion-venta (Lucas Avila) | — | — |
 | 5 | C-10 historial-ventas (Lucas Avila) | (apoyo: casos manuales 2 y 7) | (apoyo: casos manuales 3 y 7) |
-| 6 | C-11 casos-manuales-readme-final (todo el equipo) | C-11 | C-11 |
+| 6 | C-11 casos-manuales-readme-final (TiziiV y juanmagarciat) | C-11 | C-11 |
 
 ---
 
@@ -272,7 +272,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 
 ---
 
-## ETAPA 2 — Mateo Liendo (C-04 y C-05), Lucas Avila (C-06 a C-10) y todo el equipo (C-11)
+## ETAPA 2 — Mateo Liendo (C-04 y C-05), Lucas Avila (C-06 a C-10), Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat) (C-11)
 
 > Prerrequisito de toda la Etapa 2: leer el contrato `id`/`name` (README, copiado en C-01). **No renombrar ids ni names**; si hace falta cambiarlos, se actualizan HTML y README a la vez y se avisa al equipo.
 > Si se divide `js/app.js` (`data.js`, `storage.js`, `render.js`, `validators.js`, `ventas.js`), cargar con `<script defer>` en orden y sin módulos ES (SU-02).
@@ -457,9 +457,9 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ## FASE 7 — Cierre del TPI
 
 ### [C-11] `casos-manuales-readme-final`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado por Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat). El README tiene «Estado del trabajo», el índice de los 8 casos y las decisiones de Etapa 2. El JS muestra `#catalogo-vacio`, `#libros-vacio` y `#clientes-vacio` cuando el array está vacío.
 - **Ejercicio**: Ej. 6 — Casos manuales y README final
-- **Owner**: A definir (Etapa 2)
+- **Owner**: Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat)
 - **Scope**:
   - Ejecutar a mano los casos 2 a 8 en el navegador (re-verificar el 8 a 320/1280 px y teclado con los datos dinámicos) y registrar el **resultado observado** de los 8 casos en el README; si uno falla, anotar el comportamiento real (RN-GL-03, US-012)
   - Revisar que no queden restos de datos estáticos duplicados y que todas las zonas de mensaje funcionen con datos reales
@@ -529,7 +529,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 | C-08 | `composicion-venta` | 2 | Ej. 5 | Lucas Avila | MEDIO | C-05 |
 | C-09 | `confirmacion-venta` | 2 | Ej. 5 | Lucas Avila | ALTO | C-08 |
 | C-10 | `historial-ventas` | 2 | Ej. 5 | Lucas Avila | MEDIO | C-09 |
-| C-11 | `casos-manuales-readme-final` | 2 | Ej. 6 | A definir | BAJO | C-06, C-07, C-10 |
+| C-11 | `casos-manuales-readme-final` | 2 | Ej. 6 | TiziiV y juanmagarciat | BAJO | C-06, C-07, C-10 |
 | C-12 | `extras-prototipo` (opcional) | Extra | Extras del prototipo (DD-14) | A definir | MEDIO | C-11 |
 
 Primer change recomendado: `C-01` (`estructura-html-navegacion`) — para arrancar: `/opsx:propose estructura-html-navegacion`.

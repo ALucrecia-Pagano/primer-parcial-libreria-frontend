@@ -11,7 +11,45 @@ Trabajo Práctico Integrador de Programación III (UTN FRM): frontend estático 
 
 - No hace falta servidor, `npm`, instalación ni conexión a internet: todo el proyecto es HTML, CSS y JavaScript nativos, con recursos locales.
 - Navegador probado: Microsoft Edge 155 (Chromium) en Windows 11. Debería funcionar igual en las versiones actuales de Chrome y Firefox, pero esos no se probaron.
-- Con JavaScript deshabilitado la página sigue siendo legible (ver "Degradación sin JavaScript" y "Filtro por título").
+- Con JavaScript deshabilitado se ven las cinco vistas, los formularios y el menú. Los listados quedan vacíos porque los arma el script (ver "Degradación sin JavaScript").
+
+## Estado del trabajo
+
+La consigna obligatoria está implementada: catálogo, filtro por título, altas de libros y clientes, venta, historial y persistencia en `localStorage` (C-01 a C-10). Queda fuera de la entrega el extra C-12 (inicio, escritores, detalle con estrellas, ingresar y registro).
+
+C-11 (casos manuales y README final) lo cerraron Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat).
+
+| Tema | Dónde está |
+|---|---|
+| Cómo se navega | «Navegación entre vistas» |
+| Qué hace cada pantalla | «Qué es maqueta y qué funciona» |
+| Altas y validaciones | «Altas de libros y clientes» |
+| Venta, precio histórico e historial | «Venta e historial» y «Ventas guardadas» |
+| Claves de `localStorage` y sus límites | «Datos de dominio guardados en el navegador» |
+| Imágenes y fuente | «Recursos y procedencia» |
+| Los 8 casos manuales, con el resultado observado | tabla de abajo |
+
+Decisiones de la Etapa 2, ya aplicadas en el código:
+
+- **Libro repetido en una venta (IN-02):** se suma la cantidad al renglón existente. No se crea otro renglón.
+- **JSON corrupto en `localStorage`:** esa clave vuelve al seed y se muestra el aviso de datos corruptos.
+- **Email:** `^[^\s@]+@[^\s@]+\.[^\s@]+$`. Se compara y se guarda sin espacios exteriores y en minúsculas.
+- **Archivos JS:** `js/data.js` (seed y formato), `js/storage.js` (única puerta a `localStorage`) y `js/app.js` (pantallas). Scripts clásicos con `defer`, en ese orden.
+
+### Los 8 casos de la consigna
+
+El resultado observado de cada caso ya está registrado en el README. Esta tabla indica en qué verificación quedó.
+
+| # | Caso | Resultado observado |
+|---|---|---|
+| 1 | Búsqueda por título: mayúsculas, vacío y texto inexistente | «Casos manuales de la Etapa 1» |
+| 2 | Alta de libro con ISBN existente y con ISBN nuevo | «Verificación manual — correcciones Etapa 2», caso 2 |
+| 3 | Alta de cliente: email inválido, existente en mayúsculas y nuevo | misma verificación, caso 3 |
+| 4 | Venta sin cliente, cantidad inválida y libro repetido | misma verificación, caso 4 |
+| 5 | Venta de 2 × 1500 y 1 × 2000 | misma verificación, caso 5 |
+| 6 | Precio histórico después de cambiar el catálogo guardado | misma verificación, caso 6, con los pasos en «Cómo reproducir el caso del precio histórico» |
+| 7 | Recarga después de altas y venta, sin duplicar | misma verificación, caso 7 |
+| 8 | Teclado y anchos 320 px / 1280 px | «Casos manuales de la Etapa 1» (caso 8) y, con los datos de la Etapa 2, la fila «Teclado y anchos» de «Verificación manual — correcciones Etapa 2» |
 
 ## Contrato de maqueta (`id` / `name`)
 
@@ -116,7 +154,7 @@ La página es un único `index.html` con 5 vistas (`<section class="vista">`): C
 
 ### Degradación sin JavaScript
 
-Sin JavaScript (la clase `js` en `<html>` no se agrega) se ven las 5 vistas una debajo de otra, la sidebar es un bloque de enlaces visible también a 320 px, no aparecen los botones de hamburguesa, cerrar, colapsar ni de tema, y los enlaces del menú desplazan hasta cada sección (son anclas comunes).
+Sin JavaScript (la clase `js` en `<html>` no se agrega) se ven las 5 vistas una debajo de otra, la sidebar es un bloque de enlaces visible también a 320 px, no aparecen los botones de hamburguesa, cerrar, colapsar ni de tema, y los enlaces del menú desplazan hasta cada sección (son anclas comunes). Los listados (catálogo, libros, clientes, renglones e historial) quedan vacíos: sus filas las crea el script. Los formularios conservan las opciones escritas en el HTML.
 
 ### Handler de formularios de maqueta
 
@@ -231,8 +269,8 @@ Hacerlo en una copia del proyecto, con datos de prueba:
 ### Qué queda fuera de este change
 
 - **C-03 (`filtro-titulo-readme-avance`):** el filtro del catálogo por título. **Ya implementado por C-03**: el buscador filtra las tarjetas (ver "Filtro por título") y se quitó el aviso de maqueta del Catálogo.
-- **C-12 (`extras-prototipo`, opcional):** vista Inicio, escritores, detalle de libro con estrellas, Ingresar/Registro, toasts y migas de pan.
-- **Etapa 2 (C-04 a C-11):** datos locales, `localStorage` de libros, clientes y ventas, validaciones, ventas e historial real.
+- **C-12 (`extras-prototipo`, opcional):** vista Inicio, escritores, detalle de libro con estrellas, Ingresar/Registro, toasts y migas de pan. No forma parte de la entrega.
+- **Etapa 2 (C-04 a C-10):** ya implementada. El mapa de lo que hace cada pantalla está en «Estado del trabajo» y en «Qué es maqueta y qué funciona».
 
 ## Contraste de color (C-02)
 
@@ -572,12 +610,12 @@ El campo "Buscar por título" del Catálogo filtra las tarjetas mientras se escr
 
 - **Regla:** `coincideTitulo(titulo, busqueda)` (función global de `js/app.js`, pura, sin DOM). Devuelve `true` si el título contiene la búsqueda sin distinguir mayúsculas, tildes ni otros diacríticos, ni espacios al principio o al final de la búsqueda (`orbita` y `ÓRBITA` encuentran «Órbita lenta»). Ambos textos pasan por `normalizarTexto(texto)`, también pura: `normalize('NFD')`, quita las marcas `U+0300–U+036F` y pasa a minúsculas. Búsqueda vacía o solo espacios devuelve `true` (se ven todos). Tolera `null` y `undefined`.
 - **Eventos:** `input` y `change` sobre `#catalogo-busqueda`, y `submit` sobre `#form-busqueda` (Enter o clic en "Buscar"; `preventDefault()` y vuelve a filtrar, la página no se recarga). `registrarFormulariosMaqueta()` omite `#form-busqueda`, que ya no usa el handler de maqueta.
-- **Ocultar tarjetas:** `filtrarCatalogo()` asigna `hidden` a cada `.tarjeta` de `#catalogo-lista` según el texto de su `.tarjeta__titulo` (`textContent`).
-- **Mensajes:** `#catalogo-sin-resultados` se muestra solo si hay tarjetas y ninguna coincide. `#catalogo-vacio` no lo toca el filtro (lo gobernará C-04 cuando el catálogo salga del array).
+- **Render:** `filtrarCatalogo()` filtra el array `libros` con `coincideTitulo` y vuelve a dibujar `#catalogo-lista` con `createElement` y `textContent`. No oculta tarjetas estáticas: desde C-04 no hay tarjetas escritas en el HTML.
+- **Mensajes:** `#catalogo-sin-resultados` se muestra solo si hay libros y ninguno coincide. `#catalogo-vacio` se muestra cuando `libros` tiene longitud 0. `#libros-vacio` y `#clientes-vacio` se muestran cuando su array está vacío.
 - **Zona de estado para lectores de pantalla:** `#catalogo-resultados` (`role="status"`, `aria-live="polite"`, clase `solo-lectores`, vacía al cargar). `textoResultadosCatalogo(visibles, total, busquedaVacia)` arma el texto: "Se muestran los 6 libros." (búsqueda vacía), "Se muestra 1 de 6 libros.", "Se muestran 4 de 6 libros." o "No se encontraron libros que coincidan con la búsqueda.". El texto no incluye lo que escribió el usuario y se escribe con `textContent`.
 - **Tildes y ñ (desde `pulido-final-etapa1`, 15/10/2026):** antes los acentos no se normalizaban y `orbita` no encontraba «Órbita lenta»; ahora sí (RN-CA-04). Efecto aceptado: la ñ se descompone en «n» + virgulilla, así que `nino` encuentra «niño» (ningún título del catálogo de ejemplo tiene ñ). Los signos de puntuación y los espacios internos no se normalizan.
-- **Degradación sin JavaScript:** se ven las 6 tarjetas y ningún mensaje; enviar el buscador recarga `index.html?busqueda=...` con el catálogo completo, sin errores.
-- **Para C-04:** reemplazar el cuerpo de `filtrarCatalogo()` por un re-render desde `libros.filter(l => coincideTitulo(l.titulo, busqueda))`, conservando `coincideTitulo`, `textoResultadosCatalogo`, los listeners y `#catalogo-resultados`.
+- **Degradación sin JavaScript:** `#catalogo-lista` queda vacía (las tarjetas las crea el script). Enviar el buscador recarga `index.html?busqueda=...` y no filtra.
+- **Catálogo vacío:** si no hay libros, `#catalogo-resultados` anuncia «Todavía no hay libros en el catálogo.» Con libros, los textos siguen siendo «Se muestran los 6 libros.», «Se muestra 1 de 6 libros.», «Se muestran 4 de 6 libros.» o «No se encontraron libros que coincidan con la búsqueda.» El número sale de `libros.length`, no está fijo en 6.
 
 ## Casos manuales de la Etapa 1
 
