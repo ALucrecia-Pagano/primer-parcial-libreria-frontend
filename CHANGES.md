@@ -332,8 +332,10 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 
 > Tras C-05, C-06, C-07 y C-08 son independientes entre sí y pueden hacerse en paralelo. Las altas deben refrescar los selectores de Ventas (RN-FO-04): usar una función de render compartida (`renderSelectores()`), no duplicar lógica.
 
+> **Nota (correcciones Etapa 2):** el código de C-06 a C-10 se corrigió y completó en el change `correcciones-etapa2`, archivado el 19/10/2026 tras la verificación manual (README, «Verificación manual — correcciones Etapa 2»).
+
 ### [C-06] `alta-libros`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-10-19-correcciones-etapa2/`)
 - **Ejercicio**: Ej. 4 — Altas con validación (libros)
 - **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
@@ -355,7 +357,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - `knowledge-base/08_arquitectura_propuesta.md` §Tabla de contrato id/name (Libros)
 
 ### [C-07] `alta-clientes`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-10-19-correcciones-etapa2/`)
 - **Ejercicio**: Ej. 4 — Altas con validación (clientes)
 - **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
@@ -376,7 +378,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - `knowledge-base/10_preguntas_abiertas.md` (regex de email)
 
 ### [C-08] `composicion-venta`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-10-19-correcciones-etapa2/`)
 - **Ejercicio**: Ej. 5 — Ventas (composición)
 - **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
@@ -405,7 +407,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ## FASE 6 — Confirmación e historial
 
 ### [C-09] `confirmacion-venta`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-10-19-correcciones-etapa2/`)
 - **Ejercicio**: Ej. 5 — Ventas (confirmación)
 - **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:
@@ -428,7 +430,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
   - `knowledge-base/09_decisiones_y_supuestos.md` §DD-09, §DD-10, §DD-11
 
 ### [C-10] `historial-ventas`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` completado (archivado en `openspec/changes/archive/2026-10-19-correcciones-etapa2/`)
 - **Ejercicio**: Ej. 5 — Historial de ventas
 - **Owner**: Lucas Avila (Etapa 2)
 - **Scope**:

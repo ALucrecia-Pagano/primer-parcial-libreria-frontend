@@ -22,11 +22,17 @@ function cargar(clave) {
   if (!esClaveValida(clave)) {
     return undefined;
   }
+  let texto;
   try {
-    const texto = window.localStorage.getItem(clave);
-    if (texto === null) {
-      return undefined;
-    }
+    texto = window.localStorage.getItem(clave);
+  } catch (error) {
+    // Almacenamiento bloqueado o inaccesible: se trata como ausencia.
+    return undefined;
+  }
+  if (texto === null) {
+    return undefined;
+  }
+  try {
     return JSON.parse(texto);
   } catch (error) {
     // JSON corrupto: la clave existe pero su contenido no es JSON válido.

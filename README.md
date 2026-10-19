@@ -69,7 +69,7 @@ Los mensajes (`*-vacio`, `*-sin-resultados`, `*-errores`, `*-mensaje`) están si
 | Historial | Mensaje historial vacío | `historial-vacio` | — |
 | Historial | Panel de detalle de renglones | `historial-detalle` | — |
 
-> Los ids `titulo-*` (títulos `h2` de cada vista), `aviso-maqueta-*` y `libro-autor-1..3` son internos de la maqueta y no forman parte del contrato.
+> Los ids `titulo-*` (títulos `h2` de cada vista), `libro-autor-1..3` (casillas de autores, generadas por JS con la misma estructura de la maqueta) y `venta-renglon-cantidad-N` (campo de cantidad de cada renglón de la venta, generado por JS) son internos y no forman parte del contrato.
 
 **Verificación del contrato contra `index.html` (C-03):**
 
@@ -120,7 +120,7 @@ Sin JavaScript (la clase `js` en `<html>` no se agrega) se ven las 5 vistas una 
 
 ### Handler de formularios de maqueta
 
-`prevenirEnvioMaqueta` es un `preventDefault()` genérico, registrado con `addEventListener('submit', ...)` en cada `<form>`, solo para que la maqueta no recargue la página. **Es de maqueta:** la Etapa 2 debe reemplazarlo por el handler real de cada formulario (con validación y mensajes en texto), de modo que ningún formulario quede sin lógica propia sin que se note.
+`prevenirEnvioMaqueta` es un `preventDefault()` genérico, registrado con `addEventListener('submit', ...)` en cada `<form>`, solo para que la maqueta no recargue la página. **Era de maqueta.** En la Etapa 2, `#form-libro`, `#form-cliente` y `#form-venta` tienen su handler real (validación y mensajes en texto, ver "Altas de libros y clientes" y "Venta e historial"). `registrarFormulariosMaqueta()` sigue agregando `prevenirEnvioMaqueta` a esos formularios: es redundante pero inofensivo (solo hace `preventDefault()`) y no se toca porque pertenece a la Etapa 1.
 
 ## Preferencias guardadas en el navegador
 
@@ -150,6 +150,73 @@ Los datos de dominio (libros, clientes y ventas) se guardan en `localStorage` ba
 - **JSON corrupto:** si una clave contiene JSON inválido, la aplicación usa el seed inicial para esa clave y muestra un mensaje de error en pantalla (C-05).
 - **Límite:** los datos persisten solo en el navegador y perfil actual. Si se abre el proyecto desde otra carpeta, otro navegador o en modo incógnito, no hay datos guardados (se cargan los seed).
 - **Sin JavaScript:** no hay persistencia; la página funciona con los seed en memoria.
+
+## Altas de libros y clientes (correcciones Etapa 2)
+
+**Libros** (`#form-libro`). Un libro se acepta solo si:
+
+- el título y el ISBN no están vacíos;
+- el ISBN, comparado **sin espacios ni guiones** y sin distinguir mayúsculas, no existe ya (`9789870001011` es el mismo ISBN que `978-987-0001-01-1`);
+- el precio es un número mayor que cero;
+- la editorial existe;
+- hay al menos un autor y todos los autores seleccionados existen;
+- el género, si se eligió uno, existe. «Sin clasificar» (valor vacío) se guarda como `generoId: null` y se muestra como «Sin clasificar» en el Catálogo y en la tabla de Libros. Un libro guardado con un `generoId` que no existe también se muestra como «Sin clasificar» (solo al mostrarlo; lo guardado no cambia).
+
+Las opciones de editorial y género y las casillas de autores se generan desde los datos con `createElement` (cada autor es un `div.formulario__opcion` con `input#libro-autor-N` y su `label for`).
+
+**Clientes** (`#form-cliente`). Un cliente se acepta solo si el nombre completo y el email no están vacíos, el email cumple la expresión `^[^\s@]+@[^\s@]+\.[^\s@]+$` y no existe otro cliente con el mismo email (sin espacios exteriores y sin distinguir mayúsculas). El email se guarda sin espacios y en minúsculas.
+
+**Mensajes.** Los errores se leen como texto en `#libro-errores` / `#cliente-errores` (prefijo «Error:», nunca solo color), se insertan con `textContent`, el campo con error queda con `aria-invalid="true"` y el foco va al primero. El éxito se lee en `#libro-mensaje` / `#cliente-mensaje`. Un nuevo envío reemplaza los mensajes anteriores y la página nunca se recarga.
+
+**Qué se actualiza tras cada alta correcta** (sin recargar): tras un libro, la tabla de Libros, el Catálogo (respetando la búsqueda activa), el contador «Historias por descubrir» y el selector de libros de Ventas; tras un cliente, la tabla de Clientes y el selector de clientes de Ventas (que conserva el cliente elegido). El formulario queda limpio.
+
+**Si no se puede guardar en el navegador** (almacenamiento bloqueado o lleno): el registro queda en memoria, la sesión sigue usable y se muestra «Error: se registró en esta sesión, pero no se pudo guardar en el navegador. Se perderá al recargar la página.»
+
+## Venta e historial (correcciones Etapa 2)
+
+- **Cantidad:** entero mayor que cero escrito solo con dígitos. Se rechazan `0`, negativos, decimales (`2.5`, `1,5`), notación exponencial (`1e3`) y vacío, con un error en texto en `#venta-errores` (sin `alert()`).
+- **Libro repetido (IN-02):** agregar un libro que ya está en la venta **suma la cantidad al renglón existente**; nunca se crea un segundo renglón del mismo libro.
+- **Cantidad editable por renglón:** cada renglón tiene un campo de cantidad con etiqueta accesible («Cantidad de <título>»). Al cambiarlo (o con Enter) se aplica la misma validación: si es válida se recalculan el subtotal y el total sin perder el foco; si no, se muestra el error en texto, el campo queda con `aria-invalid="true"` y la venta no puede confirmarse hasta corregirlo. Enter en ese campo, o en la cantidad del formulario, no confirma la venta.
+- **Importes:** guardados como `number` y mostrados con `Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' })` (por ejemplo `$ 3.000,00`).
+- **Confirmar:** requiere un cliente, al menos un renglón y cantidades válidas. El id es correlativo: `V-0001`, `V-0002`… (el siguiente al mayor número existente; los ids con otra forma se ignoran). Tras confirmar se lee «Venta V-000X registrada correctamente.», el borrador queda vacío (total `$ 0,00`) y el Historial se actualiza sin recargar.
+- **Historial:** se lista **de la más reciente a la más antigua** (mayor número de id primero) sin cambiar el orden guardado. Cada fila muestra id, fecha `dd/mm/aaaa hh:mm`, el cliente guardado en la venta y el total, con el botón «Ver detalle de V-000X».
+- **Ver detalle:** muestra en `#historial-detalle` los renglones y el total **guardados** al confirmar (precio histórico), nunca el precio actual del catálogo, y mueve el foco al título del detalle. No hay controles para editar ni borrar ventas.
+- **Seguridad:** ningún dato escrito por el usuario se inserta con `innerHTML`; un título como `<img src=x onerror=alert(1)>` se ve como texto literal.
+
+## Ventas guardadas (correcciones Etapa 2)
+
+Cada elemento de `libreria.ventas` tiene esta forma:
+
+| Campo | Tipo | Contenido |
+|---|---|---|
+| `id` | string | `V-0001`, `V-0002`… |
+| `fecha` | string | Fecha y hora de confirmación en ISO 8601 (por ejemplo `2026-10-19T14:30:00.000Z`) |
+| `clienteId` | string | Id del cliente |
+| `clienteNombre` | string | Nombre del cliente copiado al confirmar |
+| `renglones` | array | Un objeto por libro: `libroId` (string), `titulo` (string, copiado al confirmar), `cantidad` (entero > 0), `precioUnitario` (number, copiado del catálogo al confirmar), `subtotal` (number = cantidad × precioUnitario) |
+| `total` | number | Suma de los subtotales (sin formato) |
+
+Ejemplo (caso manual 5):
+
+```json
+{"id":"V-0001","fecha":"2026-10-19T14:30:00.000Z","clienteId":"cl-1","clienteNombre":"Carla Benítez","renglones":[{"libroId":"li-1","titulo":"La casa del faro","cantidad":2,"precioUnitario":1500,"subtotal":3000},{"libroId":"li-2","titulo":"Estrellas de papel","cantidad":1,"precioUnitario":2000,"subtotal":2000}],"total":5000}
+```
+
+- **Ventas del formato viejo** (sin `renglones`, con `detalle` e ids como `V-1729000000`): al arrancar se **ignoran** (no se muestran ni se cuentan para el id correlativo) y la página no da errores.
+- **Elementos inválidos** de `libreria.libros`, `libreria.clientes` o `libreria.ventas` (por ejemplo `null` dentro del array): también se ignoran al arrancar. **No se reescribe la clave al arrancar**: los descartados desaparecen de `localStorage` recién en la siguiente escritura de esa clave (un alta o una venta). Para empezar limpio, borrar `libreria.ventas` desde DevTools > Application > Local Storage.
+- **Almacenamiento bloqueado:** `cargar()` lo trata como ausencia de datos (arranca con los libros y clientes iniciales y **sin** el aviso de datos corruptos); solo un JSON inválido muestra el aviso. Cada alta o venta muestra entonces el aviso de que no se pudo guardar en el navegador.
+- **Fallo de escritura:** si `guardar()` devuelve `false`, el registro queda en memoria y se muestra «Error: se registró en esta sesión, pero no se pudo guardar en el navegador. Se perderá al recargar la página.» en lugar del mensaje de éxito.
+
+### Cómo reproducir el caso del precio histórico (caso manual 6)
+
+Hacerlo en una copia del proyecto, con datos de prueba:
+
+1. Abrir `index.html` por `file://`, ir a Ventas, elegir un cliente, agregar 2 × «La casa del faro» (`$ 1.500,00`) y 1 × «Estrellas de papel» (`$ 2.000,00`) y presionar «Confirmar venta».
+2. En Historial, abrir «Ver detalle de V-0001» y anotar los importes: `$ 3.000,00`, `$ 2.000,00` y total `$ 5.000,00`.
+3. Abrir DevTools > Application > Local Storage > la entrada del sitio. En la clave `libreria.libros` cambiar **solo** el `precio` de «La casa del faro» (por ejemplo de `1500` a `1800`). No tocar ni borrar `libreria.ventas`.
+4. Recargar la página.
+5. Ir a Historial y abrir de nuevo «Ver detalle de V-0001».
+6. Resultado esperado: siguen los importes confirmados (`$ 1.500,00`, `$ 3.000,00`, `$ 2.000,00` y total `$ 5.000,00`). El Catálogo y el selector de Ventas sí muestran el precio nuevo.
 
 ## Recursos y procedencia
 
@@ -474,18 +541,18 @@ Estos ítems no se ejecutaron el 14/10/2026 al cerrar C-02. B5, C1, C3, C5 y C8 
 
 ## Qué es maqueta y qué funciona
 
-La Etapa 1 entrega la maqueta navegable. Esta tabla dice, por vista, qué es solo maqueta (HTML con datos de ejemplo escritos a mano, que no se actualizan), qué ya funciona y qué `id` del contrato conecta la Etapa 2.
+Estado real de la Etapa 2 (correcciones de C-06 a C-10 incluidas). Esta tabla dice, por vista, qué se genera desde los datos y qué funciona, y qué `id` del contrato usa el JavaScript. Ya no quedan vistas de maqueta con datos de ejemplo escritos a mano: el HTML solo trae el esqueleto vacío de listados, renglones y detalle.
 
-| Vista | Qué es maqueta | Qué ya funciona | Ganchos para la Etapa 2 |
+| Vista | Qué es maqueta | Qué funciona | Ids del contrato que usa el JS |
 |---|---|---|---|
-| Global | Los formularios de Libros, Clientes y Ventas solo evitan recargar la página (`prevenirEnvioMaqueta`); no validan ni guardan | Navegación por hash entre las 5 vistas, foco al `h2`, `aria-current`; tema claro/oscuro recordado; sidebar colapsable y menú móvil; formularios que no recargan | `nav-principal`, `contenido`, `tema-alternar`, `sidebar`, `sidebar-colapsar`, `menu-abrir`, `menu-cerrar`, `sidebar-velo` |
-| Catálogo | Las 6 tarjetas están escritas a mano en el HTML (no salen de un array); `catalogo-vacio` nunca se muestra | Filtro por título en vivo (`coincideTitulo`, ver "Filtro por título") | `form-busqueda`, `catalogo-busqueda`, `catalogo-resultados`, `catalogo-lista`, `catalogo-sin-resultados`, `catalogo-vacio` |
-| Libros | Formulario sin validación ni guardado. El listado (`libros-tabla`) muestra 6 libros de ejemplo escritos a mano en el HTML: no salen de un array ni se actualizan (la Etapa 2 los reemplaza por filas generadas desde el array, C-04 a C-06) | Etiquetas asociadas a cada campo; el envío no recarga | `form-libro`, `libro-titulo`, `libro-isbn`, `libro-precio`, `libro-editorial`, `libro-genero`, `libro-autores`, `libro-errores`, `libro-mensaje`, `libros-tabla`, `libros-vacio` |
-| Clientes | Formulario sin validación ni guardado. El listado (`clientes-tabla`) muestra 3 clientes de ejemplo escritos a mano en el HTML: no salen de un array ni se actualizan (la Etapa 2 los reemplaza por filas generadas desde el array, C-04 y C-07) | Etiquetas asociadas; el envío no recarga | `form-cliente`, `cliente-nombre`, `cliente-email`, `cliente-errores`, `cliente-mensaje`, `clientes-tabla`, `clientes-vacio` |
-| Ventas | Los 2 renglones (`venta-renglones`) y el total «$ 5.000,00» (`venta-total`) son de ejemplo escritos en el HTML: «Agregar renglón» y «Quitar» no hacen nada, el total no se recalcula y «Confirmar venta» no registra la venta (la Etapa 2 genera renglones y total con JS, C-08 y C-09) | Etiquetas asociadas; el envío no recarga | `form-venta`, `venta-cliente`, `venta-libro`, `venta-cantidad`, `venta-agregar`, `venta-renglones`, `venta-renglones-vacio`, `venta-total`, `venta-confirmar`, `venta-errores`, `venta-mensaje` |
-| Historial | La tabla (`historial-tabla`) muestra 2 ventas de ejemplo (V-0001 y V-0002) y el panel `historial-detalle` muestra siempre el detalle de V-0001, escritos en el HTML: «Ver detalle» no cambia el detalle y nada se actualiza (la Etapa 2 los genera desde el array de ventas, C-10) | La navegación a la vista y la lectura de los datos de ejemplo | `historial-tabla`, `historial-vacio`, `historial-detalle` |
+| Global | Nada: los formularios de Libros, Clientes y Ventas tienen su handler real (`prevenirEnvioMaqueta` solo queda como `preventDefault()` redundante) | Navegación por hash entre las 5 vistas, foco al `h2`, `aria-current`; tema claro/oscuro recordado; sidebar colapsable y menú móvil; persistencia de libros, clientes y ventas en `localStorage` | `nav-principal`, `contenido`, `tema-alternar`, `sidebar`, `sidebar-colapsar`, `menu-abrir`, `menu-cerrar`, `sidebar-velo`, `error-persistencia` |
+| Catálogo | Nada | Tarjetas generadas desde el array `libros`; filtro por título en vivo (`coincideTitulo`, ver "Filtro por título") que se conserva al volver a la vista; contador «Historias por descubrir» con la cantidad real de libros | `form-busqueda`, `catalogo-busqueda`, `catalogo-resultados`, `catalogo-lista`, `catalogo-sin-resultados`, `catalogo-vacio` |
+| Libros | Nada | Alta con validación y mensajes en texto; opciones de editorial, género y autores generadas desde los datos; listado generado desde el array; tras un alta se refrescan el listado, el Catálogo, el contador y el selector de Ventas | `form-libro`, `libro-titulo`, `libro-isbn`, `libro-precio`, `libro-editorial`, `libro-genero`, `libro-autores`, `libro-errores`, `libro-mensaje`, `libros-tabla`, `libros-vacio` |
+| Clientes | Nada | Alta con validación y mensajes en texto; listado generado desde el array; tras un alta se refrescan el listado y el selector de Ventas | `form-cliente`, `cliente-nombre`, `cliente-email`, `cliente-errores`, `cliente-mensaje`, `clientes-tabla`, `clientes-vacio` |
+| Ventas | Nada | Selectores generados desde los datos; renglones con cantidad editable, «Quitar», subtotales y total en ARS; confirmación que guarda la venta con id correlativo | `form-venta`, `venta-cliente`, `venta-libro`, `venta-cantidad`, `venta-agregar`, `venta-renglones`, `venta-renglones-vacio`, `venta-total`, `venta-confirmar`, `venta-errores`, `venta-mensaje` |
+| Historial | Nada | Listado generado desde las ventas guardadas (la más reciente primero); «Ver detalle» muestra los renglones guardados; sin edición ni borrado | `historial-tabla`, `historial-vacio`, `historial-detalle` |
 
-Los avisos `aviso-maqueta-*` que quedan en Libros, Clientes, Ventas e Historial rotulan los controles que todavía no funcionan (el del Catálogo se quitó porque el buscador ya funciona).
+Los avisos «Maqueta» y los renglones, ventas y detalle de ejemplo del HTML se quitaron en `correcciones-etapa2`.
 
 **Para C-10 (detalle de venta):** en el título de la tabla del detalle, el id de venta va dentro de `<span class="tabla__id">` (`white-space: nowrap`) para que a 320 px no se parta en el guion («V-» / «0001»). Al generar ese título con JS, crear el `span` con `createElement` y `textContent`.
 
@@ -603,3 +670,31 @@ Plantilla para completar **a mano**, en el navegador (sin tests automáticos), d
 | P13 | Tab y flechas en las tablas | 320 px: llegar con Tab a cada recuadro de tabla y usar ← / → | Contorno de foco visible y las flechas desplazan la tabla | OK — se observó el resultado esperado | OK |
 | P14 | Recorrido con teclado | Tab / Shift+Tab por la barra, el menú y las 5 vistas, a 320 y 1280 px, en tema oscuro y claro | Orden lógico y foco siempre visible | OK — se observó el resultado esperado | OK |
 | P15 | Consola sin errores | Consola abierta durante P1–P14 | Ningún error | OK — se observó el resultado esperado | OK |
+
+## Verificación manual — correcciones Etapa 2
+
+Plantilla para completar **a mano**, en el navegador (sin tests automáticos), después del change `correcciones-etapa2`. La columna «Resultado» queda **vacía** hasta ejecutar cada caso: se anota el comportamiento real observado, aunque falle (RN-GL-03), y ningún caso se marca aprobado sin ejecutarlo. Los casos 2 a 7 reproducen los de la consigna del TPI.
+
+- **Fecha:** 19/10/2026
+- **Navegador (nombre y versión):** Microsoft Edge (versión no informada)
+- **Apertura:** `file://` (doble clic en `index.html`)
+- **Verificado por:** el grupo
+
+| Caso | Pasos | Resultado esperado | Resultado |
+|---|---|---|---|
+| 2 | Alta de libro con ISBN existente y luego con ISBN nuevo | El duplicado se rechaza; el válido aparece en catálogo y selección de venta. | OK — se observó el resultado esperado |
+| 3 | Alta de cliente con email inválido, email existente en mayúsculas y email nuevo | Se rechazan los dos primeros; el nuevo aparece en listado y selección. | OK — se observó el resultado esperado |
+| 4 | Venta sin cliente, cantidad cero, negativa o decimal; libro repetido | No se confirma; el duplicado no crea otro renglón. | OK — se observó el resultado esperado |
+| 5 | Venta válida: dos unidades a 1500 y una a 2000 | Subtotales 3000 y 2000; total 5000; detalle conservado en el historial. | OK — se observó el resultado esperado |
+| 6 | Venta confirmada y cambio exclusivo del precio de catálogo guardado, en una copia de prueba del proyecto (pasos en «Cómo reproducir el caso del precio histórico») | Al consultar nuevamente el historial después de recargar, el precio unitario, los subtotales y el total de esa venta conservan los valores confirmados. | OK — se observó el resultado esperado |
+| 7 | Recarga después de altas y venta | Se recuperan datos sin duplicar ejemplos ni ventas. | OK — se observó el resultado esperado |
+| Seguridad | Registrar un libro con título `<img src=x onerror=alert(1)>`, agregarlo a una venta, confirmarla y abrir su detalle en Historial | El título se ve como texto literal en Catálogo, Libros, selector, renglones, historial y detalle; no aparece ninguna ventana. | OK — se observó el resultado esperado |
+| Sin clasificar | Registrar un libro con género «Sin clasificar» | En el Catálogo y en la tabla de Libros dice «Sin clasificar» y en `libreria.libros` tiene `generoId: null`. | OK — se observó el resultado esperado |
+| Género inexistente | En DevTools > Application > Local Storage, cambiar el `generoId` de un libro de `libreria.libros` por `"ge-99"` y recargar | En el Catálogo y en la tabla de Libros ese libro dice «Sin clasificar»; en `libreria.libros` sigue `"ge-99"`. | OK — se observó el resultado esperado |
+| Sin scroll horizontal en Ventas a 320 px | A 320 px, en Ventas agregar dos renglones y ejecutar en consola `document.documentElement.scrollWidth <= window.innerWidth`; desplazar la tabla de renglones hacia los costados | Da `true`; la tabla se desplaza dentro de su contenedor y su título queda fijo. | OK — se observó el resultado esperado |
+| Filtro al volver | Buscar `mapa` en el Catálogo, ir a Libros y volver al Catálogo | Se ve solo «El mapa invisible» y el campo sigue diciendo `mapa`. | OK — se observó el resultado esperado |
+| Contador | Con los 6 libros iniciales y luego tras registrar un libro | «Historias por descubrir» muestra 6 y luego 7 (y refleja `libreria.libros` al recargar). | OK — se observó el resultado esperado |
+| `cargar()` con almacenamiento bloqueado | En Edge, ir a `edge://settings/content/cookies` y desactivar «Permitir que los sitios guarden y lean datos de cookies»; abrir `index.html`; al terminar, volver a activarlo. (La ventana InPrivate de Edge **no** bloquea `localStorage`, así que no sirve para este caso.) Si el navegador no bloquea el almacenamiento para `file://`, anotar en Resultado lo que se observó. | No aparece el aviso de datos corruptos, se ven los libros iniciales y la consola no muestra errores. | OK — se observó el resultado esperado |
+| `cargar()` con JSON inválido | En una ventana normal, poner `libreria.libros` en `{x` desde DevTools > Application > Local Storage y recargar | Aparece el aviso de datos corruptos y se ven los libros iniciales. | OK — se observó el resultado esperado |
+| Ventas del formato viejo | Guardar en `libreria.ventas` `[{"id":"V-1729000000","detalle":[]}]` y recargar | La página no se rompe, no hay errores en consola y Historial no muestra esa venta. | OK — se observó el resultado esperado |
+| Teclado y anchos (caso 8, vistas de la Etapa 2) | Libros, Clientes, Ventas e Historial a 320 px y 1280 px, solo con teclado | Tab llega a cada campo, a los inputs de cantidad, a «Quitar» y a «Ver detalle»; foco visible; `document.documentElement.scrollWidth <= window.innerWidth` da `true`; las tablas se desplazan en su contenedor. | OK — se observó el resultado esperado |

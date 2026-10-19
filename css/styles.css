@@ -883,6 +883,8 @@ html.js .tema-alternar {
 
 /* Tablas: el contenedor se desplaza, la página no */
 .tabla-contenedor {
+  /* Referencia de los .solo-lectores (position: absolute) de la tabla: sin esto toman la página y generan scroll horizontal. */
+  position: relative;
   max-width: 100%;
   margin-bottom: var(--espacio-4);
   overflow-x: auto;
@@ -922,6 +924,12 @@ html.js .tema-alternar {
 /* Id de venta dentro de un título: nunca se parte en el guion ("V-" / "0001"). */
 .tabla__id {
   white-space: nowrap;
+}
+
+/* Campo de cantidad editable dentro de un renglón de venta (el foco visible lo hereda de los controles). */
+.tabla__cantidad {
+  width: 5rem;
+  min-width: 4rem;
 }
 
 .tabla th,

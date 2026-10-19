@@ -120,7 +120,7 @@ function mostrarVista(id, opciones) {
 
   // Render inicial de listados desde los arrays (C-04).
   if (id === 'catalogo') {
-    renderCatalogo(libros);
+    filtrarCatalogo();
   }
   if (id === 'libros') {
     renderLibros();
@@ -352,6 +352,12 @@ function obtenerNombreGenero(id) {
   return genero ? genero.nombre : '';
 }
 
+// Rótulo de género para mostrar: sin género o con un id que no existe → «Sin clasificar».
+// No cambia lo que se guarda (generoId sigue tal cual en libreria.libros).
+function obtenerTextoGenero(libro) {
+  return obtenerNombreGenero(libro.generoId) || 'Sin clasificar';
+}
+
 function obtenerNombresAutores(ids) {
   return ids.map(function (id) {
     const autor = autores.find(function (a) {
@@ -412,7 +418,7 @@ function renderCatalogo(librosAMostrar) {
 
     agregarDato('ISBN', libro.isbn);
     agregarDato('Editorial', obtenerNombreEditorial(libro.editorialId));
-    agregarDato('Género', libro.generoId ? obtenerNombreGenero(libro.generoId) : 'Sin clasificar');
+    agregarDato('Género', obtenerTextoGenero(libro));
     agregarDato('Autores', obtenerNombresAutores(libro.autorIds));
     articulo.appendChild(dl);
 
@@ -448,7 +454,7 @@ function renderLibros() {
     agregarCelda(libro.titulo);
     agregarCelda(libro.isbn);
     agregarCelda(obtenerNombreEditorial(libro.editorialId));
-    agregarCelda(libro.generoId ? obtenerNombreGenero(libro.generoId) : 'Sin clasificar');
+    agregarCelda(obtenerTextoGenero(libro));
     agregarCelda(obtenerNombresAutores(libro.autorIds));
     agregarCelda(formatearImporteARS(libro.precio));
 
@@ -540,7 +546,8 @@ function iniciarPersistencia() {
     errorPersistencia.hidden = false;
     guardar('libreria.libros', libros);
   } else if (librosGuardados !== undefined && Array.isArray(librosGuardados)) {
-    libros = librosGuardados;
+    // Se ignoran los elementos con forma inválida (no se reescribe la clave al arrancar).
+    libros = librosGuardados.filter(esLibroGuardadoValido);
   } else {
     guardar('libreria.libros', libros);
   }
@@ -551,7 +558,7 @@ function iniciarPersistencia() {
     errorPersistencia.hidden = false;
     guardar('libreria.clientes', clientes);
   } else if (clientesGuardados !== undefined && Array.isArray(clientesGuardados)) {
-    clientes = clientesGuardados;
+    clientes = clientesGuardados.filter(esClienteGuardadoValido);
   } else {
     guardar('libreria.clientes', clientes);
   }
@@ -562,7 +569,7 @@ function iniciarPersistencia() {
     errorPersistencia.hidden = false;
     guardar('libreria.ventas', ventas);
   } else if (ventasGuardadas !== undefined && Array.isArray(ventasGuardadas)) {
-    ventas = ventasGuardadas;
+    ventas = ventasGuardadas.filter(esVentaGuardadaValida);
   } else {
     guardar('libreria.ventas', ventas);
   }
@@ -574,566 +581,903 @@ registrarFormulariosMaqueta();
 iniciarTema();
 iniciarSidebar();
 iniciarFiltroCatalogo();
+
 // ==========================================
-// C-06: ALTA DE LIBROS (Fase 5) - por Lucas
+// Helpers comunes de mensajes (correcciones Etapa 2)
+// Todo texto de usuario entra al DOM con textContent (RN-GL-01).
 // ==========================================
+
+// Quita todos los hijos de un elemento (sin innerHTML).
+function vaciarElemento(el) {
+  while (el.firstChild) {
+    el.removeChild(el.firstChild);
+  }
+}
+
+// Muestra una lista de errores [{ campo, mensaje }] (o textos) en un contenedor role="alert".
+function mostrarErrores(contenedor, errores) {
+  if (!contenedor) {
+    return;
+  }
+  vaciarElemento(contenedor);
+  const intro = document.createElement('p');
+  intro.textContent = 'Error: revisá estos datos.';
+  const lista = document.createElement('ul');
+  errores.forEach(function (error) {
+    const item = document.createElement('li');
+    item.textContent = typeof error === 'string' ? error : error.mensaje;
+    lista.appendChild(item);
+  });
+  contenedor.appendChild(intro);
+  contenedor.appendChild(lista);
+  contenedor.hidden = false;
+}
+
+// Muestra un único texto de error (prefijo «Error:») en un contenedor role="alert".
+function mostrarAvisoError(contenedor, texto) {
+  if (!contenedor) {
+    return;
+  }
+  vaciarElemento(contenedor);
+  const parrafo = document.createElement('p');
+  parrafo.textContent = texto;
+  contenedor.appendChild(parrafo);
+  contenedor.hidden = false;
+}
+
+// Muestra un mensaje de éxito en una zona role="status".
+function mostrarMensajeExito(contenedor, texto) {
+  if (!contenedor) {
+    return;
+  }
+  contenedor.textContent = texto;
+  contenedor.hidden = false;
+}
+
+// Vacía y oculta un contenedor de mensajes.
+function ocultarMensaje(contenedor) {
+  if (!contenedor) {
+    return;
+  }
+  vaciarElemento(contenedor);
+  contenedor.hidden = true;
+}
+
+// Aviso cuando el registro quedó en memoria pero no se pudo escribir en el navegador (D9).
+const TEXTO_ERROR_GUARDADO =
+  'Error: se registró en esta sesión, pero no se pudo guardar en el navegador. Se perderá al recargar la página.';
+
+// Marca los controles con error (aria-invalid) y enfoca el primero.
+// Para el grupo de autores se enfoca la primera casilla.
+function marcarCamposInvalidos(errores) {
+  let primero = null;
+  errores.forEach(function (error) {
+    const campo = document.getElementById(error.campo);
+    if (!campo) {
+      return;
+    }
+    campo.setAttribute('aria-invalid', 'true');
+    if (primero === null) {
+      primero = campo;
+    }
+  });
+  if (primero) {
+    const enfocable = primero.id === 'libro-autores' ? primero.querySelector('input') : primero;
+    if (enfocable) {
+      enfocable.focus();
+    }
+  }
+}
+
+// Quita aria-invalid de todos los controles de un formulario (y del fieldset de autores).
+function limpiarCamposInvalidos(contenedor) {
+  contenedor.querySelectorAll('[aria-invalid]').forEach(function (campo) {
+    campo.removeAttribute('aria-invalid');
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Validadores de forma de lo guardado en localStorage (puros).
+// ---------------------------------------------------------------------------
+function esObjetoPlano(valor) {
+  return valor !== null && typeof valor === 'object' && !Array.isArray(valor);
+}
+
+function esNumeroFinito(valor) {
+  return typeof valor === 'number' && Number.isFinite(valor);
+}
+
+function esLibroGuardadoValido(libro) {
+  return esObjetoPlano(libro) &&
+    typeof libro.id === 'string' &&
+    typeof libro.titulo === 'string' &&
+    typeof libro.isbn === 'string' &&
+    typeof libro.editorialId === 'string' &&
+    esNumeroFinito(libro.precio) &&
+    Array.isArray(libro.autorIds);
+}
+
+function esClienteGuardadoValido(cliente) {
+  return esObjetoPlano(cliente) &&
+    typeof cliente.id === 'string' &&
+    typeof cliente.nombreCompleto === 'string' &&
+    typeof cliente.email === 'string';
+}
+
+function esRenglonGuardadoValido(renglon) {
+  return esObjetoPlano(renglon) &&
+    typeof renglon.libroId === 'string' &&
+    typeof renglon.titulo === 'string' &&
+    Number.isSafeInteger(renglon.cantidad) && renglon.cantidad > 0 &&
+    esNumeroFinito(renglon.precioUnitario) &&
+    esNumeroFinito(renglon.subtotal);
+}
+
+function esVentaGuardadaValida(venta) {
+  return esObjetoPlano(venta) &&
+    typeof venta.id === 'string' &&
+    typeof venta.fecha === 'string' &&
+    typeof venta.clienteId === 'string' &&
+    typeof venta.clienteNombre === 'string' &&
+    esNumeroFinito(venta.total) &&
+    Array.isArray(venta.renglones) &&
+    venta.renglones.length > 0 &&
+    venta.renglones.every(esRenglonGuardadoValido);
+}
+
+// Escribe en .bienvenida__cantidad la cantidad real de libros (punto 18).
+function actualizarContadorLibros() {
+  const contador = document.querySelector('.bienvenida__cantidad');
+  if (contador) {
+    contador.textContent = String(libros.length);
+  }
+}
+
+// ==========================================
+// C-06: ALTA DE LIBROS
+// ==========================================
+
+// Reemplaza las opciones de un select con createElement; conserva la primera opción indicada.
+function llenarOpciones(select, textoVacio, items) {
+  vaciarElemento(select);
+  const vacia = document.createElement('option');
+  vacia.value = '';
+  vacia.textContent = textoVacio;
+  select.appendChild(vacia);
+  items.forEach(function (item) {
+    const opcion = document.createElement('option');
+    opcion.value = item.id;
+    opcion.textContent = item.nombre;
+    select.appendChild(opcion);
+  });
+}
 
 function poblarFormularioLibro() {
   const selectEditorial = document.getElementById('libro-editorial');
   const selectGenero = document.getElementById('libro-genero');
   const fieldsetAutores = document.getElementById('libro-autores');
 
-  // 1. Cargar Editoriales
-  if (selectEditorial && typeof editoriales !== 'undefined') {
-    selectEditorial.innerHTML = '<option value="">Seleccione una editorial...</option>';
-    editoriales.forEach(ed => {
-      const opt = document.createElement('option');
-      opt.value = ed.id;
-      opt.textContent = ed.nombre;
-      selectEditorial.appendChild(opt);
-    });
+  if (selectEditorial) {
+    llenarOpciones(selectEditorial, 'Elegí una editorial', editoriales);
+  }
+  if (selectGenero) {
+    llenarOpciones(selectGenero, 'Sin clasificar', generos);
   }
 
-  // 2. Cargar Géneros
-  if (selectGenero && typeof generos !== 'undefined') {
-    selectGenero.innerHTML = '<option value="">Sin clasificar</option>';
-    generos.forEach(gen => {
-      const opt = document.createElement('option');
-      opt.value = gen.id;
-      opt.textContent = gen.nombre;
-      selectGenero.appendChild(opt);
-    });
-  }
+  if (fieldsetAutores) {
+    vaciarElemento(fieldsetAutores);
+    const leyenda = document.createElement('legend');
+    leyenda.className = 'formulario__leyenda';
+    leyenda.textContent = 'Autores';
+    fieldsetAutores.appendChild(leyenda);
 
-  // 3. Cargar Autores (Checkboxes)
-  if (fieldsetAutores && typeof autores !== 'undefined') {
-    fieldsetAutores.innerHTML = '<legend>Autores (*)</legend>';
-    autores.forEach(aut => {
-      const label = document.createElement('label');
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.name = 'autorIds';
-      input.value = aut.id;
-      
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(` ${aut.nombre}`));
-      fieldsetAutores.appendChild(label);
+    autores.forEach(function (autor, indice) {
+      const idCasilla = 'libro-autor-' + (indice + 1);
+      const opcion = document.createElement('div');
+      opcion.className = 'formulario__opcion';
+
+      const casilla = document.createElement('input');
+      casilla.type = 'checkbox';
+      casilla.id = idCasilla;
+      casilla.name = 'autorIds';
+      casilla.value = autor.id;
+
+      const etiqueta = document.createElement('label');
+      etiqueta.setAttribute('for', idCasilla);
+      etiqueta.textContent = autor.nombre;
+
+      opcion.appendChild(casilla);
+      opcion.appendChild(etiqueta);
+      fieldsetAutores.appendChild(opcion);
     });
   }
 }
+
 // Función auxiliar para sacarle espacios y guiones al ISBN
 function normalizarIsbn(isbn) {
   return String(isbn || '').replace(/[\s-]/g, '').toLowerCase();
 }
 
-// Función pura de validación
+// Función pura de validación. Devuelve [{ campo, mensaje }] (vacío si es válido).
 function validarLibro(datos, listaLibros, listaEditoriales, listaGeneros, listaAutores) {
   const errores = [];
 
   // 1. Título obligatorio
-  if (!datos.titulo || datos.titulo.trim() === '') {
-    errores.push('El título es obligatorio.');
+  if (!datos.titulo || String(datos.titulo).trim() === '') {
+    errores.push({ campo: 'libro-titulo', mensaje: 'El título es obligatorio.' });
   }
 
-  // 2. ISBN obligatorio y único
+  // 2. ISBN obligatorio y único (sin espacios ni guiones, sin distinguir mayúsculas)
   const isbnLimpio = normalizarIsbn(datos.isbn);
   if (!isbnLimpio) {
-    errores.push('El ISBN es obligatorio.');
-  } else {
-    const isbnExiste = listaLibros.some(l => normalizarIsbn(l.isbn) === isbnLimpio);
-    if (isbnExiste) {
-      errores.push('El ISBN ya se encuentra registrado.');
-    }
+    errores.push({ campo: 'libro-isbn', mensaje: 'El ISBN es obligatorio.' });
+  } else if (listaLibros.some(function (l) { return normalizarIsbn(l.isbn) === isbnLimpio; })) {
+    errores.push({ campo: 'libro-isbn', mensaje: 'El ISBN ya se encuentra registrado.' });
   }
 
   // 3. Precio numérico mayor a cero
   const precioNum = Number(datos.precio);
-  if (isNaN(precioNum) || precioNum <= 0) {
-    errores.push('El precio debe ser un número mayor a cero.');
+  if (String(datos.precio).trim() === '' || !Number.isFinite(precioNum) || precioNum <= 0) {
+    errores.push({ campo: 'libro-precio', mensaje: 'El precio debe ser un número mayor a cero.' });
   }
 
   // 4. Editorial existente
-  if (!datos.editorialId || !listaEditoriales.some(e => e.id === datos.editorialId)) {
-    errores.push('Debe seleccionar una editorial válida.');
+  if (!datos.editorialId || !listaEditoriales.some(function (e) { return e.id === datos.editorialId; })) {
+    errores.push({ campo: 'libro-editorial', mensaje: 'Debe seleccionar una editorial válida.' });
   }
 
-  // 5. Al menos 1 autor
+  // 5. Al menos 1 autor y todos existentes (RN-LI-05)
   if (!Array.isArray(datos.autorIds) || datos.autorIds.length === 0) {
-    errores.push('Debe seleccionar al menos un autor.');
+    errores.push({ campo: 'libro-autores', mensaje: 'Debe seleccionar al menos un autor.' });
+  } else if (!datos.autorIds.every(function (id) { return listaAutores.some(function (a) { return a.id === id; }); })) {
+    errores.push({ campo: 'libro-autores', mensaje: 'Alguno de los autores seleccionados no existe.' });
   }
 
-  // 6. Género opcional (pero si mandan uno, debe existir)
-  if (datos.generoId && !listaGeneros.some(g => g.id === datos.generoId)) {
-    errores.push('El género seleccionado no es válido.');
+  // 6. Género opcional (pero si se eligió uno, debe existir)
+  if (datos.generoId && !listaGeneros.some(function (g) { return g.id === datos.generoId; })) {
+    errores.push({ campo: 'libro-genero', mensaje: 'El género seleccionado no es válido.' });
   }
 
   return errores;
 }
-// Función para manejar el envío del formulario de libros
+
+// Refresca todo lo que muestra libros tras un alta.
+function refrescarVistasLibros() {
+  renderLibros();
+  filtrarCatalogo();
+  actualizarContadorLibros();
+  renderSelectorLibrosVenta();
+}
+
 function registrarHandlerAltaLibro() {
   const form = document.getElementById('form-libro');
-  if (!form) return;
+  if (!form) {
+    return;
+  }
 
-  // Removemos el handler genérico de la maqueta si es que estaba
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+  form.addEventListener('submit', function (evento) {
+    evento.preventDefault();
 
     const divErrores = document.getElementById('libro-errores');
     const divMensaje = document.getElementById('libro-mensaje');
 
-    // Ocultar y limpiar mensajes previos
-    if (divErrores) {
-      divErrores.hidden = true;
-      divErrores.innerHTML = '';
-    }
-    if (divMensaje) {
-      divMensaje.hidden = true;
-      divMensaje.textContent = '';
-    }
+    // Un nuevo envío reemplaza los mensajes anteriores.
+    ocultarMensaje(divErrores);
+    ocultarMensaje(divMensaje);
+    limpiarCamposInvalidos(form);
 
-    // 1. Recolectar datos del formulario
     const titulo = document.getElementById('libro-titulo').value;
     const isbn = document.getElementById('libro-isbn').value;
     const precio = document.getElementById('libro-precio').value;
     const editorialId = document.getElementById('libro-editorial').value;
     const generoId = document.getElementById('libro-genero').value || null;
+    const autorIds = Array.from(form.querySelectorAll('input[name="autorIds"]:checked')).map(function (casilla) {
+      return casilla.value;
+    });
 
-    const autorCheckboxes = form.querySelectorAll('input[name="autorIds"]:checked');
-    const autorIds = Array.from(autorCheckboxes).map(cb => cb.value);
-
-    const datosForm = { titulo, isbn, precio, editorialId, generoId, autorIds };
-
-    // 2. Validar
-    const errores = validarLibro(datosForm, libros, editoriales, generos, autores);
+    const errores = validarLibro(
+      { titulo: titulo, isbn: isbn, precio: precio, editorialId: editorialId, generoId: generoId, autorIds: autorIds },
+      libros, editoriales, generos, autores
+    );
 
     if (errores.length > 0) {
-      // Mostrar errores
-      const ul = document.createElement('ul');
-      errores.forEach(err => {
-        const li = document.createElement('li');
-        li.textContent = err;
-        ul.appendChild(li);
-      });
-      divErrores.appendChild(ul);
-      divErrores.hidden = false;
-      return; // Cortamos acá, no se guarda nada
+      mostrarErrores(divErrores, errores);
+      marcarCamposInvalidos(errores);
+      return;
     }
 
-    // 3. Crear el libro nuevo
     const nuevoLibro = {
-      id: 'lib-' + Date.now(), // Generamos un ID simple
+      id: 'lib-' + Date.now(),
       titulo: titulo.trim(),
       isbn: isbn.trim(),
       precio: Number(precio),
       editorialId: editorialId,
-      generoId: generoId,
+      generoId: generoId, // null = «Sin clasificar»
       autorIds: autorIds
     };
 
-    // 4. Guardar en el array y en localStorage (asumiendo que Mateo hizo la función guardar en C-05)
     libros.push(nuevoLibro);
-    if (typeof guardar === 'function') {
-      guardar('libreria.libros', libros);
-    } else {
-      localStorage.setItem('libreria.libros', JSON.stringify(libros));
-    }
+    const guardado = guardar('libreria.libros', libros);
 
-    // 5. Mostrar éxito y resetear formulario
-    if (divMensaje) {
-      divMensaje.textContent = 'Libro registrado con éxito.';
-      divMensaje.hidden = false;
-    }
     form.reset();
+    refrescarVistasLibros();
 
-    // 6. Refrescar las vistas si las funciones de Mateo de C-04 ya existen
-    if (typeof renderTablaLibros === 'function') renderTablaLibros();
-    if (typeof renderCatalogo === 'function') renderCatalogo();
+    if (guardado) {
+      mostrarMensajeExito(divMensaje, 'Libro registrado con éxito.');
+    } else {
+      mostrarAvisoError(divErrores, TEXTO_ERROR_GUARDADO);
+    }
   });
 }
 
 // ==========================================
-// INICIALIZADOR
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  poblarFormularioLibro();
-  registrarHandlerAltaLibro();
-  registrarHandlerAltaCliente();
-  poblarSelectoresVenta();
-  registrarHandlerAgregarDetalle();
-  renderTablaDetalleVenta();
-  registrarHandlerConfirmarVenta();
-  renderHistorialVentas();
-});
-// ==========================================
-// C-07: ALTA DE CLIENTES (Fase 5) - por Lucas
+// C-07: ALTA DE CLIENTES
 // ==========================================
 
-// Función pura de validación de clientes
+// Función pura de validación de clientes. Devuelve [{ campo, mensaje }].
 function validarCliente(datos, listaClientes) {
   const errores = [];
 
-  // 1. Nombre obligatorio
-  if (!datos.nombreCompleto || datos.nombreCompleto.trim() === '') {
-    errores.push('El nombre completo es obligatorio.');
+  if (!datos.nombreCompleto || String(datos.nombreCompleto).trim() === '') {
+    errores.push({ campo: 'cliente-nombre', mensaje: 'El nombre completo es obligatorio.' });
   }
 
-  // 2. Email obligatorio, con formato válido y único
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const emailLimpio = String(datos.email || '').trim().toLowerCase();
 
   if (!emailLimpio) {
-    errores.push('El email es obligatorio.');
+    errores.push({ campo: 'cliente-email', mensaje: 'El email es obligatorio.' });
   } else if (!emailRegex.test(emailLimpio)) {
-    errores.push('El formato del email no es válido.');
-  } else {
-    // Validar que no exista
-    const emailExiste = listaClientes.some(c => c.email.trim().toLowerCase() === emailLimpio);
-    if (emailExiste) {
-      errores.push('El email ya se encuentra registrado.');
-    }
+    errores.push({ campo: 'cliente-email', mensaje: 'El formato del email no es válido.' });
+  } else if (listaClientes.some(function (c) { return c.email.trim().toLowerCase() === emailLimpio; })) {
+    errores.push({ campo: 'cliente-email', mensaje: 'El email ya se encuentra registrado.' });
   }
 
   return errores;
 }
-// Función para manejar el envío del formulario de clientes
+
+// Refresca todo lo que muestra clientes tras un alta.
+function refrescarVistasClientes() {
+  renderClientes();
+  renderSelectorClientesVenta();
+}
+
 function registrarHandlerAltaCliente() {
   const form = document.getElementById('form-cliente');
-  if (!form) return;
+  if (!form) {
+    return;
+  }
 
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
+  form.addEventListener('submit', function (evento) {
+    evento.preventDefault();
 
     const divErrores = document.getElementById('cliente-errores');
     const divMensaje = document.getElementById('cliente-mensaje');
 
-    // Limpiar mensajes previos
-    if (divErrores) {
-      divErrores.hidden = true;
-      divErrores.innerHTML = '';
-    }
-    if (divMensaje) {
-      divMensaje.hidden = true;
-      divMensaje.textContent = '';
-    }
+    ocultarMensaje(divErrores);
+    ocultarMensaje(divMensaje);
+    limpiarCamposInvalidos(form);
 
-    // 1. Recolectar datos
     const nombreCompleto = document.getElementById('cliente-nombre').value;
     const email = document.getElementById('cliente-email').value;
 
-    const datosForm = { nombreCompleto, email };
-
-    // 2. Validar
-    const errores = validarCliente(datosForm, clientes);
-
+    const errores = validarCliente({ nombreCompleto: nombreCompleto, email: email }, clientes);
     if (errores.length > 0) {
-      // Mostrar errores
-      const ul = document.createElement('ul');
-      errores.forEach(err => {
-        const li = document.createElement('li');
-        li.textContent = err;
-        ul.appendChild(li);
-      });
-      divErrores.appendChild(ul);
-      divErrores.hidden = false;
+      mostrarErrores(divErrores, errores);
+      marcarCamposInvalidos(errores);
       return;
     }
 
-    // 3. Crear cliente nuevo
-    const nuevoCliente = {
+    clientes.push({
       id: 'cli-' + Date.now(),
       nombreCompleto: nombreCompleto.trim(),
       email: email.trim().toLowerCase()
-    };
+    });
+    const guardado = guardar('libreria.clientes', clientes);
 
-    // 4. Guardar
-    clientes.push(nuevoCliente);
-    if (typeof guardar === 'function') {
-      guardar('libreria.clientes', clientes);
-    } else {
-      localStorage.setItem('libreria.clientes', JSON.stringify(clientes));
-    }
-
-    // 5. Notificar éxito y limpiar
-    if (divMensaje) {
-      divMensaje.textContent = 'Cliente registrado con éxito.';
-      divMensaje.hidden = false;
-    }
     form.reset();
+    refrescarVistasClientes();
 
-    // 6. Refrescar tablas
-    if (typeof renderTablaClientes === 'function') renderTablaClientes();
-    if (typeof poblarSelectoresVenta === 'function') poblarSelectoresVenta();
+    if (guardado) {
+      mostrarMensajeExito(divMensaje, 'Cliente registrado con éxito.');
+    } else {
+      mostrarAvisoError(divErrores, TEXTO_ERROR_GUARDADO);
+    }
   });
 }
+
 // ==========================================
-// C-08: COMPOSICIÓN DE VENTA - por Lucas
+// C-08: COMPOSICIÓN DE VENTA
 // ==========================================
 
-// 1. Variable global temporal para guardar los libros que el usuario va agregando
-let detalleVentaActual = [];
+// Borrador de la venta en memoria: [{ libroId, cantidad }]. Precio y título se leen de `libros`.
+let renglonesBorrador = [];
 
-// 2. Función para cargar las listas desplegables de Clientes y Libros
-function poblarSelectoresVenta() {
-  // Nota: Asumo que los IDs en tu index.html son 'venta-cliente' y 'venta-libro'. 
-  // Si no llega a cargar, revisamos el HTML.
-  const selectClienteVenta = document.getElementById('venta-cliente');
-  const selectLibroVenta = document.getElementById('venta-libro');
+const TEXTO_ERROR_CANTIDAD = 'La cantidad debe ser un número entero mayor que cero.';
 
-  // Llenar selector de Clientes
-  if (selectClienteVenta && typeof clientes !== 'undefined') {
-    selectClienteVenta.innerHTML = '<option value="">Seleccione un cliente...</option>';
-    clientes.forEach(cli => {
-      const opt = document.createElement('option');
-      opt.value = cli.id;
-      // Mostramos nombre y email para evitar confusiones
-      opt.textContent = `${cli.nombreCompleto} (${cli.email})`;
-      selectClienteVenta.appendChild(opt);
-    });
+// Cantidad válida: solo dígitos, entero seguro y mayor que cero (rechaza 0, -1, 2.5, 1,5, 1e3 y vacío).
+function esCantidadValida(texto) {
+  const limpio = String(texto).trim();
+  return /^\d+$/.test(limpio) && Number(limpio) > 0 && Number.isSafeInteger(Number(limpio));
+}
+
+function buscarLibroPorId(id) {
+  return libros.find(function (libro) {
+    return libro.id === id;
+  });
+}
+
+// Reconstruye un select de Ventas con createElement conservando la selección si aún existe.
+function renderSelectorVenta(select, textoVacio, items, textoOpcion) {
+  if (!select) {
+    return;
+  }
+  const seleccionado = select.value;
+  vaciarElemento(select);
+  const vacia = document.createElement('option');
+  vacia.value = '';
+  vacia.textContent = textoVacio;
+  select.appendChild(vacia);
+  items.forEach(function (item) {
+    const opcion = document.createElement('option');
+    opcion.value = item.id;
+    opcion.textContent = textoOpcion(item);
+    select.appendChild(opcion);
+  });
+  if (items.some(function (item) { return item.id === seleccionado; })) {
+    select.value = seleccionado;
+  }
+}
+
+function renderSelectorClientesVenta() {
+  renderSelectorVenta(document.getElementById('venta-cliente'), 'Elegí un cliente', clientes, function (cliente) {
+    return cliente.nombreCompleto + ' (' + cliente.email + ')';
+  });
+}
+
+function renderSelectorLibrosVenta() {
+  renderSelectorVenta(document.getElementById('venta-libro'), 'Elegí un libro', libros, function (libro) {
+    return libro.titulo + ' — ' + formatearImporteARS(libro.precio);
+  });
+}
+
+// Calcula el total del borrador (redondeado a 2 decimales) a partir de los precios actuales.
+function calcularTotalBorrador() {
+  const total = renglonesBorrador.reduce(function (suma, renglon) {
+    const libro = buscarLibroPorId(renglon.libroId);
+    return suma + (libro ? libro.precio * renglon.cantidad : 0);
+  }, 0);
+  return Math.round(total * 100) / 100;
+}
+
+function actualizarTotalVenta() {
+  const total = document.getElementById('venta-total');
+  if (total) {
+    total.textContent = formatearImporteARS(calcularTotalBorrador());
+  }
+}
+
+// Agrega un renglón al borrador o suma la cantidad si el libro ya está (IN-02, D6).
+function agregarRenglonBorrador() {
+  const selectLibro = document.getElementById('venta-libro');
+  const inputCantidad = document.getElementById('venta-cantidad');
+  const divErrores = document.getElementById('venta-errores');
+  const divMensaje = document.getElementById('venta-mensaje');
+
+  ocultarMensaje(divErrores);
+  ocultarMensaje(divMensaje);
+  selectLibro.removeAttribute('aria-invalid');
+  inputCantidad.removeAttribute('aria-invalid');
+
+  const errores = [];
+  const libro = selectLibro.value ? buscarLibroPorId(selectLibro.value) : undefined;
+  if (!libro) {
+    errores.push({ campo: 'venta-libro', mensaje: 'Elegí un libro.' });
+  }
+  if (!esCantidadValida(inputCantidad.value)) {
+    errores.push({ campo: 'venta-cantidad', mensaje: TEXTO_ERROR_CANTIDAD });
+  }
+  if (errores.length > 0) {
+    mostrarErrores(divErrores, errores);
+    marcarCamposInvalidos(errores);
+    return;
   }
 
-  // Llenar selector de Libros
-  if (selectLibroVenta && typeof libros !== 'undefined') {
-    selectLibroVenta.innerHTML = '<option value="">Seleccione un libro...</option>';
-    libros.forEach(lib => {
-      const opt = document.createElement('option');
-      opt.value = lib.id;
-      // Mostramos título y precio para que el cajero vea el valor
-      opt.textContent = `${lib.titulo} - $${lib.precio}`;
-      selectLibroVenta.appendChild(opt);
+  const cantidad = Number(String(inputCantidad.value).trim());
+  const existente = renglonesBorrador.find(function (renglon) {
+    return renglon.libroId === libro.id;
+  });
+  if (existente) {
+    existente.cantidad += cantidad;
+  } else {
+    renglonesBorrador.push({ libroId: libro.id, cantidad: cantidad });
+  }
+
+  selectLibro.value = '';
+  inputCantidad.value = '1';
+  renderRenglonesVenta();
+}
+
+function registrarHandlerAgregarDetalle() {
+  const botonAgregar = document.getElementById('venta-agregar');
+  const inputCantidad = document.getElementById('venta-cantidad');
+  if (botonAgregar) {
+    botonAgregar.addEventListener('click', function (evento) {
+      evento.preventDefault();
+      agregarRenglonBorrador();
+    });
+  }
+  // Enter en la cantidad agrega el renglón y no confirma la venta.
+  if (inputCantidad) {
+    inputCantidad.addEventListener('keydown', function (evento) {
+      if (evento.key === 'Enter') {
+        evento.preventDefault();
+        agregarRenglonBorrador();
+      }
     });
   }
 }
-// 3. Manejar el clic en "Agregar renglón" al detalle
-function registrarHandlerAgregarDetalle() {
-  const btnAgregar = document.getElementById('venta-agregar');
-  if (!btnAgregar) return;
 
-  btnAgregar.addEventListener('click', function(e) {
-    e.preventDefault();
+// Aplica la cantidad escrita en el input de un renglón: válida -> recalcula en el lugar; inválida -> error.
+function aplicarCantidadRenglon(renglon, libro, input, celdaSubtotal) {
+  const divErrores = document.getElementById('venta-errores');
+  if (esCantidadValida(input.value)) {
+    renglon.cantidad = Number(String(input.value).trim());
+    input.removeAttribute('aria-invalid');
+    celdaSubtotal.textContent = formatearImporteARS(Math.round(libro.precio * renglon.cantidad * 100) / 100);
+    actualizarTotalVenta();
+    ocultarMensaje(divErrores);
+  } else {
+    input.setAttribute('aria-invalid', 'true');
+    mostrarErrores(divErrores, [{
+      campo: input.id,
+      mensaje: 'La cantidad de "' + libro.titulo + '" debe ser un número entero mayor que cero.'
+    }]);
+  }
+}
 
-    const selectLibro = document.getElementById('venta-libro');
-    const inputCantidad = document.getElementById('venta-cantidad');
-    
-    // Como no hay un div específico para errores del detalle, usamos un alert simple para no ensuciar el HTML
-    const libroId = selectLibro.value;
-    const cantidad = parseInt(inputCantidad.value);
+// Dibuja el borrador de la venta con createElement/textContent (sin innerHTML).
+function renderRenglonesVenta() {
+  const cuerpo = document.getElementById('venta-renglones');
+  const vacio = document.getElementById('venta-renglones-vacio');
+  if (!cuerpo) {
+    return;
+  }
+  vaciarElemento(cuerpo);
 
-    // Validaciones simples
-    if (!libroId) {
-      alert('Debe seleccionar un libro.');
+  renglonesBorrador = renglonesBorrador.filter(function (renglon) {
+    return buscarLibroPorId(renglon.libroId) !== undefined;
+  });
+  if (vacio) {
+    vacio.hidden = renglonesBorrador.length > 0;
+  }
+
+  renglonesBorrador.forEach(function (renglon, indice) {
+    const libro = buscarLibroPorId(renglon.libroId);
+    const fila = document.createElement('tr');
+
+    const celdaTitulo = document.createElement('td');
+    celdaTitulo.textContent = libro.titulo;
+
+    const celdaCantidad = document.createElement('td');
+    const idInput = 'venta-renglon-cantidad-' + (indice + 1);
+    const etiqueta = document.createElement('label');
+    etiqueta.className = 'solo-lectores';
+    etiqueta.setAttribute('for', idInput);
+    etiqueta.textContent = 'Cantidad de ' + libro.titulo;
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.id = idInput;
+    input.className = 'formulario__control tabla__cantidad';
+    input.min = '1';
+    input.step = '1';
+    input.setAttribute('inputmode', 'numeric');
+    input.value = String(renglon.cantidad);
+    celdaCantidad.appendChild(etiqueta);
+    celdaCantidad.appendChild(input);
+
+    const celdaPrecio = document.createElement('td');
+    celdaPrecio.textContent = formatearImporteARS(libro.precio);
+
+    const celdaSubtotal = document.createElement('td');
+    celdaSubtotal.textContent = formatearImporteARS(Math.round(libro.precio * renglon.cantidad * 100) / 100);
+
+    const celdaAccion = document.createElement('td');
+    const botonQuitar = document.createElement('button');
+    botonQuitar.type = 'button';
+    botonQuitar.className = 'boton boton--secundario';
+    botonQuitar.appendChild(document.createTextNode('Quitar'));
+    const textoLector = document.createElement('span');
+    textoLector.className = 'solo-lectores';
+    textoLector.textContent = ' ' + libro.titulo;
+    botonQuitar.appendChild(textoLector);
+    celdaAccion.appendChild(botonQuitar);
+
+    input.addEventListener('change', function () {
+      aplicarCantidadRenglon(renglon, libro, input, celdaSubtotal);
+    });
+    // Enter aplica el cambio y no confirma la venta (envío implícito).
+    input.addEventListener('keydown', function (evento) {
+      if (evento.key === 'Enter') {
+        evento.preventDefault();
+        aplicarCantidadRenglon(renglon, libro, input, celdaSubtotal);
+      }
+    });
+    botonQuitar.addEventListener('click', function () {
+      renglonesBorrador.splice(renglonesBorrador.indexOf(renglon), 1);
+      ocultarMensaje(document.getElementById('venta-errores'));
+      renderRenglonesVenta();
+      const selectLibro = document.getElementById('venta-libro');
+      if (selectLibro) {
+        selectLibro.focus();
+      }
+    });
+
+    fila.appendChild(celdaTitulo);
+    fila.appendChild(celdaCantidad);
+    fila.appendChild(celdaPrecio);
+    fila.appendChild(celdaSubtotal);
+    fila.appendChild(celdaAccion);
+    cuerpo.appendChild(fila);
+  });
+
+  actualizarTotalVenta();
+}
+
+// Relee los inputs de cantidad de los renglones y valida todos. Devuelve [{ campo, mensaje }].
+function sincronizarCantidadesBorrador() {
+  const errores = [];
+  const inputs = document.querySelectorAll('#venta-renglones input');
+  renglonesBorrador.forEach(function (renglon, indice) {
+    const input = inputs[indice];
+    if (!input) {
       return;
     }
-    if (isNaN(cantidad) || cantidad <= 0) {
-      alert('La cantidad debe ser mayor a cero.');
-      return;
-    }
-
-    // Buscamos el libro en nuestro array general
-    const libro = libros.find(l => l.id === libroId);
-    if (!libro) return;
-
-    // Chequear si el libro ya está en el detalle temporal
-    const detalleExistente = detalleVentaActual.find(d => d.libroId === libroId);
-    if (detalleExistente) {
-      // Si ya está, le sumamos la cantidad
-      detalleExistente.cantidad += cantidad;
-      detalleExistente.subtotal = detalleExistente.cantidad * libro.precio;
+    if (esCantidadValida(input.value)) {
+      renglon.cantidad = Number(String(input.value).trim());
+      input.removeAttribute('aria-invalid');
     } else {
-      // Si es nuevo, lo agregamos al array temporal
-      detalleVentaActual.push({
-        libroId: libro.id,
-        titulo: libro.titulo,
-        precioUnitario: libro.precio,
-        cantidad: cantidad,
-        subtotal: cantidad * libro.precio
+      const libro = buscarLibroPorId(renglon.libroId);
+      input.setAttribute('aria-invalid', 'true');
+      errores.push({
+        campo: input.id,
+        mensaje: 'La cantidad de "' + (libro ? libro.titulo : renglon.libroId) + '" debe ser un número entero mayor que cero.'
       });
     }
-
-    // Limpiar inputs (opcional, dejamos la cantidad en 1 por comodidad)
-    selectLibro.value = '';
-    inputCantidad.value = '1';
-
-    // Refrescar la tabla del carrito
-    renderTablaDetalleVenta();
   });
+  return errores;
 }
 
-// 4. Dibujar la tabla del carrito temporal
-function renderTablaDetalleVenta() {
-  const tbody = document.getElementById('venta-renglones');
-  const spanTotal = document.getElementById('venta-total'); 
-  const pVacio = document.getElementById('venta-renglones-vacio');
-  
-  if (!tbody) return;
-  tbody.innerHTML = ''; // Limpiamos la maqueta
+// ==========================================
+// C-09: CONFIRMACIÓN DE VENTA
+// ==========================================
 
-  let totalVenta = 0;
-
-  if (detalleVentaActual.length === 0) {
-    if (pVacio) pVacio.hidden = false;
-    if (spanTotal) spanTotal.innerHTML = '$&nbsp;0,00';
-    return;
-  } else {
-    if (pVacio) pVacio.hidden = true;
-  }
-
-  detalleVentaActual.forEach((det, index) => {
-    totalVenta += det.subtotal;
-
-    const tr = document.createElement('tr');
-    
-    tr.innerHTML = `
-      <td>${det.titulo}</td>
-      <td>${det.cantidad}</td>
-      <td>$&nbsp;${det.precioUnitario.toFixed(2).replace('.', ',')}</td>
-      <td>$&nbsp;${det.subtotal.toFixed(2).replace('.', ',')}</td>
-      <td><button class="boton boton--secundario btn-quitar" type="button" data-index="${index}">Quitar</button></td>
-    `;
-    
-    tbody.appendChild(tr);
+// Siguiente id correlativo: V-0001, V-0002... (el mayor número existente + 1). Ignora ids con otra forma.
+function calcularSiguienteIdVenta(listaVentas) {
+  let maximo = 0;
+  listaVentas.forEach(function (venta) {
+    const coincidencia = /^V-(\d+)$/.exec(venta && venta.id);
+    if (coincidencia) {
+      maximo = Math.max(maximo, Number(coincidencia[1]));
+    }
   });
-
-  // Evento para los botones "Quitar" de la tablita temporal
-  const botonesQuitar = tbody.querySelectorAll('.btn-quitar');
-  botonesQuitar.forEach(btn => {
-    btn.addEventListener('click', function() {
-      const idx = this.getAttribute('data-index');
-      detalleVentaActual.splice(idx, 1); // Lo borramos del array temporal
-      renderTablaDetalleVenta(); // Redibujamos
-    });
-  });
-
-  // Mostrar el total formateado
-  if (spanTotal) {
-    spanTotal.innerHTML = `$&nbsp;${totalVenta.toFixed(2).replace('.', ',')}`;
-  }
+  return 'V-' + String(maximo + 1).padStart(4, '0');
 }
-// ==========================================
-// C-09: CONFIRMACIÓN DE VENTA - por Lucas
-// ==========================================
+
+// Valida una venta antes de confirmarla. Devuelve [{ campo, mensaje }].
+function validarVenta(clienteId, renglones, listaClientes, listaLibros) {
+  const errores = [];
+  if (!clienteId) {
+    errores.push({ campo: 'venta-cliente', mensaje: 'Elegí un cliente para la venta.' });
+  } else if (!listaClientes.some(function (c) { return c.id === clienteId; })) {
+    errores.push({ campo: 'venta-cliente', mensaje: 'El cliente elegido no existe.' });
+  }
+  if (renglones.length === 0) {
+    errores.push({ campo: 'venta-libro', mensaje: 'Agregá al menos un libro a la venta.' });
+  }
+  renglones.forEach(function (renglon) {
+    const libro = listaLibros.find(function (l) { return l.id === renglon.libroId; });
+    if (!libro) {
+      errores.push({ campo: 'venta-libro', mensaje: 'Un libro de la venta ya no existe.' });
+    } else if (!esCantidadValida(String(renglon.cantidad))) {
+      errores.push({ campo: 'venta-libro', mensaje: 'La cantidad de "' + libro.titulo + '" debe ser un número entero mayor que cero.' });
+    }
+  });
+  return errores;
+}
+
+// Arma la venta a guardar copiando título, cliente y precio (precio histórico, RN-VE-08).
+function construirVenta(clienteId, renglones, listaLibros, listaClientes, listaVentas, fechaISO) {
+  const cliente = listaClientes.find(function (c) { return c.id === clienteId; });
+  const renglonesVenta = renglones.map(function (renglon) {
+    const libro = listaLibros.find(function (l) { return l.id === renglon.libroId; });
+    return {
+      libroId: libro.id,
+      titulo: libro.titulo,
+      cantidad: renglon.cantidad,
+      precioUnitario: libro.precio,
+      subtotal: Math.round(libro.precio * renglon.cantidad * 100) / 100
+    };
+  });
+  const total = renglonesVenta.reduce(function (suma, renglon) {
+    return suma + renglon.subtotal;
+  }, 0);
+  return {
+    id: calcularSiguienteIdVenta(listaVentas),
+    fecha: fechaISO,
+    clienteId: clienteId,
+    clienteNombre: cliente.nombreCompleto,
+    renglones: renglonesVenta,
+    total: Math.round(total * 100) / 100
+  };
+}
 
 function registrarHandlerConfirmarVenta() {
   const formVenta = document.getElementById('form-venta');
-  if (!formVenta) return;
+  if (!formVenta) {
+    return;
+  }
 
-  formVenta.addEventListener('submit', function(e) {
-    e.preventDefault();
+  formVenta.addEventListener('submit', function (evento) {
+    evento.preventDefault();
 
     const selectCliente = document.getElementById('venta-cliente');
     const divErrores = document.getElementById('venta-errores');
     const divMensaje = document.getElementById('venta-mensaje');
 
-    // 1. Limpiar mensajes previos
-    if (divErrores) {
-      divErrores.hidden = true;
-      divErrores.innerHTML = '';
-    }
-    if (divMensaje) {
-      divMensaje.hidden = true;
-      divMensaje.textContent = '';
-    }
+    ocultarMensaje(divErrores);
+    ocultarMensaje(divMensaje);
+    selectCliente.removeAttribute('aria-invalid');
+    document.getElementById('venta-libro').removeAttribute('aria-invalid');
 
-    const clienteId = selectCliente.value;
+    const erroresCantidad = sincronizarCantidadesBorrador();
+    const errores = validarVenta(selectCliente.value, renglonesBorrador, clientes, libros);
+    // Tras sincronizar, el borrador solo tiene cantidades válidas: las inválidas figuran en erroresCantidad.
+    const todos = errores.concat(erroresCantidad);
 
-    // 2. Validar antes de guardar
-    const errores = [];
-    if (!clienteId) errores.push('Debe seleccionar un cliente para la venta.');
-    if (detalleVentaActual.length === 0) errores.push('Error: agregá al menos un libro a la venta.');
-
-    if (errores.length > 0) {
-      if (divErrores) {
-        divErrores.innerHTML = '<p>' + errores.join('<br>') + '</p>';
-        divErrores.hidden = false;
-      }
+    if (todos.length > 0) {
+      mostrarErrores(divErrores, todos);
+      marcarCamposInvalidos(todos);
       return;
     }
 
-    // 3. Crear el objeto de la venta final
-    // Calculamos el total recorriendo el carrito
-    const totalVenta = detalleVentaActual.reduce((acc, det) => acc + det.subtotal, 0);
-    
-    // Generamos un ID provisorio (ej: V-17290000)
-    const nuevoId = 'V-' + Math.floor(Date.now() / 1000); 
+    const venta = construirVenta(selectCliente.value, renglonesBorrador, libros, clientes, ventas, new Date().toISOString());
+    ventas.push(venta);
+    const guardado = guardar('libreria.ventas', ventas);
 
-    const nuevaVenta = {
-      id: nuevoId,
-      fecha: new Date().toISOString(),
-      clienteId: clienteId,
-      detalle: [...detalleVentaActual], // Hacemos una copia del carrito
-      total: totalVenta
-    };
-
-    // 4. Guardar la venta en el sistema
-    // Asumimos que existe un array global 'ventas' (si no existe lo creamos vacío para no romper)
-    if (typeof ventas === 'undefined') {
-      window.ventas = [];
-    }
-    
-    ventas.push(nuevaVenta);
-    
-    if (typeof guardar === 'function') {
-      guardar('libreria.ventas', ventas);
-    } else {
-      localStorage.setItem('libreria.ventas', JSON.stringify(ventas));
-    }
-
-    // 5. Mostrar éxito y resetear todo
-    if (divMensaje) {
-      divMensaje.textContent = `Venta ${nuevaVenta.id} registrada correctamente.`;
-      divMensaje.hidden = false;
-    }
-
-    // Vaciamos el carrito y reseteamos la pantalla
-    detalleVentaActual = [];
+    renglonesBorrador = [];
     formVenta.reset();
-    renderTablaDetalleVenta();
-    
-    // 6. Refrescar el historial de ventas si ya existe esa función (C-10)
-    if (typeof renderHistorialVentas === 'function') {
-      renderHistorialVentas();
+    renderSelectorClientesVenta();
+    renderSelectorLibrosVenta();
+    renderRenglonesVenta();
+    renderHistorialVentas();
+
+    if (guardado) {
+      mostrarMensajeExito(divMensaje, 'Venta ' + venta.id + ' registrada correctamente.');
+    } else {
+      mostrarAvisoError(divErrores, TEXTO_ERROR_GUARDADO);
     }
   });
 }
+
 // ==========================================
-// C-10: HISTORIAL DE VENTAS - por Lucas
+// C-10: HISTORIAL DE VENTAS
 // ==========================================
 
+// Número de una venta a partir de su id (V-0007 -> 7); 0 si el id no tiene esa forma.
+function numeroDeVenta(venta) {
+  const coincidencia = /^V-(\d+)$/.exec(venta.id);
+  return coincidencia ? Number(coincidencia[1]) : 0;
+}
+
+function agregarCeldaTexto(fila, texto) {
+  const celda = document.createElement('td');
+  celda.textContent = texto;
+  fila.appendChild(celda);
+  return celda;
+}
+
+// Lista las ventas de la más reciente a la más antigua, sin modificar el array guardado (D1).
 function renderHistorialVentas() {
-  // ATENCIÓN: Pongo estos IDs por defecto, pero si en tu index.html 
-  // se llaman distinto, cambialos acá para que coincidan.
-  const tbody = document.getElementById('historial-renglones'); 
-  const pVacio = document.getElementById('historial-vacio'); 
-
-  if (!tbody) return;
-  tbody.innerHTML = ''; // Limpiamos la maqueta
-
-  // Si no hay ventas registradas
-  if (typeof ventas === 'undefined' || ventas.length === 0) {
-    if (pVacio) pVacio.hidden = false;
+  const cuerpo = document.getElementById('historial-tabla');
+  const vacio = document.getElementById('historial-vacio');
+  if (!cuerpo) {
     return;
-  } else {
-    if (pVacio) pVacio.hidden = true;
+  }
+  vaciarElemento(cuerpo);
+  if (vacio) {
+    vacio.hidden = ventas.length > 0;
   }
 
-  // Recorremos el array de ventas globales y armamos las filas
-  ventas.forEach(venta => {
-    // Buscamos el nombre del cliente real para que no se vea solo un código raro
-    const cliente = typeof clientes !== 'undefined' ? clientes.find(c => c.id === venta.clienteId) : null;
-    const nombreCliente = cliente ? cliente.nombreCompleto : venta.clienteId;
+  const ordenadas = ventas.slice().sort(function (a, b) {
+    return numeroDeVenta(b) - numeroDeVenta(a);
+  });
 
-    // Formateamos un poco la fecha para que se vea prolija
-    const fechaObj = new Date(venta.fecha);
-    const fechaFormateada = fechaObj.toLocaleDateString() + ' ' + fechaObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  ordenadas.forEach(function (venta) {
+    const fila = document.createElement('tr');
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${venta.id}</td>
-      <td>${fechaFormateada}</td>
-      <td>${nombreCliente}</td>
-      <td>${venta.detalle.length}</td>
-      <td>$&nbsp;${venta.total.toFixed(2).replace('.', ',')}</td>
-    `;
-    
-    tbody.appendChild(tr);
+    agregarCeldaTexto(fila, venta.id);
+
+    const celdaFecha = document.createElement('td');
+    const tiempo = document.createElement('time');
+    tiempo.setAttribute('datetime', venta.fecha);
+    tiempo.textContent = formatearFecha(venta.fecha);
+    celdaFecha.appendChild(tiempo);
+    fila.appendChild(celdaFecha);
+
+    agregarCeldaTexto(fila, venta.clienteNombre);
+    agregarCeldaTexto(fila, formatearImporteARS(venta.total));
+
+    const celdaAccion = document.createElement('td');
+    const boton = document.createElement('button');
+    boton.type = 'button';
+    boton.className = 'boton boton--secundario';
+    boton.textContent = 'Ver detalle de ' + venta.id;
+    boton.addEventListener('click', function () {
+      mostrarDetalleVenta(venta.id);
+    });
+    celdaAccion.appendChild(boton);
+    fila.appendChild(celdaAccion);
+
+    cuerpo.appendChild(fila);
   });
 }
+
+// Agrega "texto" + un span.tabla__id con el id de la venta (sin partirse en el guion).
+function escribirTituloConId(elemento, texto, id) {
+  vaciarElemento(elemento);
+  elemento.appendChild(document.createTextNode(texto));
+  const span = document.createElement('span');
+  span.className = 'tabla__id';
+  span.textContent = id;
+  elemento.appendChild(span);
+}
+
+// Muestra el detalle con los valores guardados en la venta (nunca el precio actual del catálogo).
+function mostrarDetalleVenta(id) {
+  const venta = ventas.find(function (v) {
+    return v.id === id;
+  });
+  const panel = document.getElementById('historial-detalle');
+  if (!venta || !panel) {
+    return;
+  }
+
+  const titulo = panel.querySelector('.detalle-venta__titulo');
+  const caption = panel.querySelector('caption');
+  const cuerpo = panel.querySelector('tbody');
+  const total = panel.querySelector('.detalle-venta__total strong');
+
+  escribirTituloConId(titulo, 'Detalle de la venta ', venta.id);
+  escribirTituloConId(caption, 'Renglones de la venta ', venta.id);
+
+  vaciarElemento(cuerpo);
+  venta.renglones.forEach(function (renglon) {
+    const fila = document.createElement('tr');
+    agregarCeldaTexto(fila, renglon.titulo);
+    agregarCeldaTexto(fila, String(renglon.cantidad));
+    agregarCeldaTexto(fila, formatearImporteARS(renglon.precioUnitario));
+    agregarCeldaTexto(fila, formatearImporteARS(renglon.subtotal));
+    cuerpo.appendChild(fila);
+  });
+  total.textContent = formatearImporteARS(venta.total);
+
+  panel.hidden = false;
+  titulo.focus();
+}
+
+// ==========================================
+// INICIALIZADOR
+// ==========================================
+document.addEventListener('DOMContentLoaded', function () {
+  poblarFormularioLibro();
+  registrarHandlerAltaLibro();
+  registrarHandlerAltaCliente();
+  renderSelectorClientesVenta();
+  renderSelectorLibrosVenta();
+  registrarHandlerAgregarDetalle();
+  renderRenglonesVenta();
+  registrarHandlerConfirmarVenta();
+  renderHistorialVentas();
+  actualizarContadorLibros();
+});

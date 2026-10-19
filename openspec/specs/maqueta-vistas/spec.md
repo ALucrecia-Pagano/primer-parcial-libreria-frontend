@@ -48,7 +48,7 @@ La vista Catálogo SHALL incluir un formulario de búsqueda por título y un lis
 - **THEN** al menos una tarjeta muestra «Sin clasificar» como género
 
 ### Requirement: Vistas de alta maquetadas
-La vista Libros SHALL incluir el formulario de alta (título, ISBN, precio, editorial, género con opción «Sin clasificar» de valor vacío, autores como grupo de casillas con `fieldset`/`legend`) y una tabla con libros de ejemplo. La vista Clientes SHALL incluir el formulario (nombre completo, email) y una tabla con clientes de ejemplo.
+La vista Libros SHALL incluir el formulario de alta (título, ISBN, precio, editorial, género con opción «Sin clasificar» de valor vacío, autores como grupo de casillas con `fieldset`/`legend`) y una tabla cuyas filas se generan desde los libros cargados. La vista Clientes SHALL incluir el formulario (nombre completo, email) y una tabla cuyas filas se generan desde los clientes cargados.
 
 #### Scenario: Selector de género
 - **WHEN** se abre el selector de género del formulario de libros
@@ -59,18 +59,26 @@ La vista Libros SHALL incluir el formulario de alta (título, ISBN, precio, edit
 - **THEN** es un `fieldset` con `legend` y casillas con `name="autorIds"`
 
 ### Requirement: Vista Ventas maquetada
-La vista Ventas SHALL incluir selector de cliente, selector de libro, cantidad, un botón para agregar renglón, una tabla de renglones con precio unitario y subtotal, el total y un botón para confirmar la venta.
+La vista Ventas SHALL incluir selector de cliente, selector de libro, cantidad, un botón para agregar renglón, una tabla de renglones con precio unitario y subtotal, el total y un botón para confirmar la venta. El HTML no SHALL traer renglones de ejemplo: los renglones los genera la composición de la venta y, sin renglones, se muestra `#venta-renglones-vacio`.
 
 #### Scenario: Renglones y total coherentes
-- **WHEN** se observan los renglones de ejemplo
+- **WHEN** se observan los renglones agregados a la venta
 - **THEN** cada subtotal es cantidad × precio unitario y el total es la suma de subtotales, todos con 2 decimales en formato ARS
 
+#### Scenario: Sin renglones de ejemplo
+- **WHEN** se abre la vista Ventas sin haber agregado libros
+- **THEN** `#venta-renglones` no tiene filas, se muestra `#venta-renglones-vacio` y el total es `$ 0,00`
+
 ### Requirement: Vista Historial maquetada
-La vista Historial SHALL incluir una tabla de ventas de ejemplo con id (formato `V-0001`), fecha (formato `dd/mm/aaaa hh:mm`), cliente, total y un control para ver el detalle, y un panel de detalle con los renglones de una venta.
+La vista Historial SHALL incluir una tabla de ventas con id (formato `V-0001`), fecha (formato `dd/mm/aaaa hh:mm`), cliente, total y un control para ver el detalle, y un panel de detalle con los renglones de una venta. El HTML no SHALL traer ventas ni renglones de ejemplo: el estado vacío lo muestra `#historial-vacio` y el panel de detalle permanece oculto hasta elegir una venta.
 
 #### Scenario: Formatos del historial
-- **WHEN** se observa una fila del historial
+- **WHEN** se observa una fila del historial generada desde una venta confirmada
 - **THEN** el id tiene la forma `V-0001`, la fecha `dd/mm/aaaa hh:mm` y el total formato `$ 5.000,00`
+
+#### Scenario: Sin ventas de ejemplo
+- **WHEN** se abre Historial sin ventas guardadas
+- **THEN** `#historial-tabla` no tiene filas, se muestra `#historial-vacio` y `#historial-detalle` está oculto
 
 ### Requirement: Campos con etiqueta asociada
 Cada campo de formulario SHALL tener un `label` asociado por `for`/`id`, y cada botón SHALL describir su acción con su texto.
@@ -101,27 +109,9 @@ Los mensajes de estado de cada vista (vacío, sin resultados, errores, resultado
 - **WHEN** en DevTools se quita `hidden` a un contenedor de errores
 - **THEN** su texto comunica el error sin depender del color
 
-### Requirement: Controles de maqueta rotulados
-Los controles que todavía no funcionan SHALL estar identificados como maqueta mediante un aviso visible en su vista, asociado a esos controles para lectores de pantalla. Un control que ya funciona SHALL dejar de llevar ese aviso; desde la Etapa 1 el buscador del Catálogo funciona y no lleva aviso de maqueta, mientras que Libros, Clientes, Ventas e Historial conservan el suyo.
-
-#### Scenario: Aviso visible
-- **WHEN** se muestra la vista Libros
-- **THEN** se lee un aviso que indica que el formulario es una maqueta y aún no guarda datos
-
-#### Scenario: Buscador del Catálogo sin aviso de maqueta
-- **WHEN** se muestra la vista Catálogo
-- **THEN** no hay aviso de maqueta y el campo de búsqueda no está descripto como maqueta para lectores de pantalla
-
 ### Requirement: Formularios sin recarga
 Ningún formulario de la maqueta SHALL recargar la página ni cambiar la URL al enviarse (Enter en un campo o clic en su botón de envío) cuando JavaScript está disponible.
 
 #### Scenario: Enter en un formulario
 - **WHEN** el operador presiona Enter dentro del campo email del formulario de clientes
 - **THEN** la página no se recarga, la URL no cambia y la vista Clientes sigue visible
-
-### Requirement: Datos y formatos de ejemplo
-Los ejemplos estáticos SHALL usar los formatos finales: importes como `$ 1.500,00` (ARS, 2 decimales), fechas `dd/mm/aaaa hh:mm` e ids de venta `V-0001`, y SHALL ser coherentes entre vistas (los libros y clientes de ventas e historial existen en Catálogo, Libros y Clientes).
-
-#### Scenario: Coherencia entre vistas
-- **WHEN** se observa el cliente y los libros de la venta `V-0001` en el historial
-- **THEN** ese cliente figura en la tabla de Clientes y esos libros en Catálogo y Libros
