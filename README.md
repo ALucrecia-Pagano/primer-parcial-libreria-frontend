@@ -748,7 +748,7 @@ Registro de la verificación **a mano**, en el navegador (sin tests automáticos
 
 ## Verificación manual — correcciones Etapa 2
 
-Plantilla para completar **a mano**, en el navegador (sin tests automáticos), después del change `correcciones-etapa2`. La columna «Resultado» queda **vacía** hasta ejecutar cada caso: se anota el comportamiento real observado, aunque falle (RN-GL-03), y ningún caso se marca aprobado sin ejecutarlo. Los casos 2 a 7 reproducen los de la consigna del TPI.
+Registro **a mano**, en el navegador (sin tests automáticos), del change `correcciones-etapa2`. La columna «Resultado» tiene el comportamiento real observado; si un caso no se ejecutó, dice «Pendiente de ejecutar», y ningún caso se marca aprobado sin ejecutarlo (RN-GL-03). Los casos 2 a 7 reproducen los de la consigna del TPI.
 
 - **Fecha:** 19/10/2026
 - **Navegador (nombre y versión):** Microsoft Edge (versión no informada)
@@ -773,3 +773,16 @@ Plantilla para completar **a mano**, en el navegador (sin tests automáticos), d
 | `cargar()` con JSON inválido | En una ventana normal, poner `libreria.libros` en `{x` desde DevTools > Application > Local Storage y recargar | Aparece el aviso de datos corruptos y se ven los libros iniciales. | OK — se observó el resultado esperado |
 | Ventas del formato viejo | Guardar en `libreria.ventas` `[{"id":"V-1729000000","detalle":[]}]` y recargar | La página no se rompe, no hay errores en consola y Historial no muestra esa venta. | OK — se observó el resultado esperado |
 | Teclado y anchos (caso 8, vistas de la Etapa 2) | Libros, Clientes, Ventas e Historial a 320 px y 1280 px, solo con teclado | Tab llega a cada campo, a los inputs de cantidad, a «Quitar» y a «Ver detalle»; foco visible; `document.documentElement.scrollWidth <= window.innerWidth` da `true`; las tablas se desplazan en su contenedor. | OK — se observó el resultado esperado |
+
+## Verificación manual — C-11
+
+Pasada del 19/10/2026 en el navegador embebido de Cursor (Chromium). No se pudo abrir `file://` desde esa herramienta: se sirvió `index.html` en `http://127.0.0.1:8765`. No se marca aprobado lo que no se observó.
+
+| Qué se probó | Resultado observado |
+|---|---|
+| Seed, búsqueda `xyz` | Cero tarjetas, texto «No se encontraron libros que coincidan con la búsqueda.» en `#catalogo-sin-resultados` y en `#catalogo-resultados`. `#catalogo-vacio` quedó oculto. Al borrar la búsqueda volvieron las 6 tarjetas y el texto «Se muestran los 6 libros.». |
+| `libreria.libros`, `libreria.clientes` y `libreria.ventas` en `[]`, recarga | En Catálogo se lee «Todavía no hay libros en el catálogo.» y `#catalogo-sin-resultados` sigue oculto. Al abrir Libros: «Todavía no hay libros cargados.». Al abrir Clientes: «Todavía no hay clientes cargados.». |
+| 1280 px, las 5 vistas | `document.documentElement.scrollWidth <= window.innerWidth` dio `true` en Catálogo, Libros, Clientes, Ventas e Historial. |
+| 320 px, listas vacías | Los tres mensajes de lista vacía se leen (tienen alto) y la página no gana scroll horizontal (`scrollWidth` 320). |
+| Teclado | Un Tab dejó el foco en `body` sin `:focus-visible`. Con el buscador enfocado, otro Tab no lo movió y `:focus-visible` siguió en `false`. El contorno de `:focus-visible` está en `css/styles.css` (`outline: 3px solid`). Esta pasada no recorrió las cinco vistas con Tab: no se marca aprobado. |
+| Consola | No se leyó el panel de consola. Al cambiar de vista no hubo una excepción. |

@@ -457,7 +457,7 @@ Los responsables de Etapa 2 están a definir; este es el orden recomendado y qu�
 ## FASE 7 — Cierre del TPI
 
 ### [C-11] `casos-manuales-readme-final`
-- **Estado**: `[x]` completado por Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat). El README tiene «Estado del trabajo», el índice de los 8 casos y las decisiones de Etapa 2. El JS muestra `#catalogo-vacio`, `#libros-vacio` y `#clientes-vacio` cuando el array está vacío.
+- **Estado**: `[x]` completado por Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat) (archivado en `openspec/changes/archive/2026-10-19-casos-manuales-readme-final/`). El README tiene «Estado del trabajo», el índice de los 8 casos y las decisiones de Etapa 2. El JS muestra `#catalogo-vacio`, `#libros-vacio` y `#clientes-vacio` cuando el array está vacío.
 - **Ejercicio**: Ej. 6 — Casos manuales y README final
 - **Owner**: Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat)
 - **Scope**:
