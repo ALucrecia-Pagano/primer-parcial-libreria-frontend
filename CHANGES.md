@@ -37,20 +37,20 @@ Integrantes del grupo (para el README): Liendo Mateo, Avila Lucas, Pagano Amanda
 ## Árbol de dependencias
 
 ```
-ETAPA 1 — Pagano Amanda
+ETAPA 1
 C-01 estructura-html-navegacion                 (Ej. 1; contrato id/name)
  └── C-02 estilos-responsive-accesibilidad      (Ej. 2)
       └── C-03 filtro-titulo-readme-avance      (Ej. 3 adelantado + entrega de avance)
 
-ETAPA 2 — Mateo Liendo (C-04 y C-05), Lucas Avila (C-06 a C-10), Valentini Tiziano (TiziiV) y Garcia Juan (juanmagarciat) (C-11); requiere contrato de C-01 y coincideTitulo de C-03
+ETAPA 2 — requiere contrato de C-01 y coincideTitulo de C-03
 C-01 + C-03
  └── C-04 datos-locales-catalogo-dinamico
       └── C-05 persistencia-localstorage
-           ├── C-06 alta-libros (Lucas Avila)
-           ├── C-07 alta-clientes (Lucas Avila)
-           └── C-08 composicion-venta (Lucas Avila)
-                └── C-09 confirmacion-venta (Lucas Avila)
-                     └── C-10 historial-ventas (Lucas Avila)
+           ├── C-06 alta-libros
+           ├── C-07 alta-clientes
+           └── C-08 composicion-venta
+                └── C-09 confirmacion-venta
+                     └── C-10 historial-ventas
 C-06 + C-07 + C-10
  └── C-11 casos-manuales-readme-final
       └── C-12 extras-prototipo   (OPCIONAL, posterior a la Etapa 2)
