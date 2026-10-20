@@ -187,7 +187,8 @@ Los datos de dominio (libros, clientes y ventas) se guardan en `localStorage` ba
 - **Arranque:** si una clave no existe en `localStorage`, se cargan los seed iniciales y se guardan. Si ya existe, se usa lo guardado sin mezclar con seed (evita duplicados al recargar).
 - **JSON corrupto:** si una clave contiene JSON inválido, la aplicación usa el seed inicial para esa clave y muestra un mensaje de error en pantalla (C-05).
 - **Límite:** los datos persisten solo en el navegador y perfil actual. Si se abre el proyecto desde otra carpeta, otro navegador o en modo incógnito, no hay datos guardados (se cargan los seed).
-- **Sin JavaScript:** no hay persistencia; la página funciona con los seed en memoria.
+- **No se comparte:** el almacenamiento no comparte información entre usuarios ni entre dispositivos; cada persona ve solo lo que se guardó en su propio navegador.
+- **Sin JavaScript:** no se cargan datos y los listados (catálogo, libros, clientes, renglones e historial) quedan vacíos.
 
 ## Altas de libros y clientes (correcciones Etapa 2)
 
@@ -263,6 +264,7 @@ Hacerlo en una copia del proyecto, con datos de prueba:
 - **Fondo galáctico y foto difuminada (CSS):** `html::before` (z-index -4) dibuja la foto `banner-biblioteca.jpg` con `filter: blur(12px) brightness(0.5)`, `transform: scale(1.1)` (oculta los bordes desenfocados) y un tinte cálido suave; igual en el tema oscuro y en el claro (se oculta solo en `forced-colors`) y sin animación. Encima, el velo galáctico con `opacity` 0.6–0.7 mantiene a la galaxia como protagonista. `body::before` dibuja las nebulosas (`radial-gradient` sobre una base negro azulado) y `body::after` las estrellas (capas de `radial-gradient` que se repiten como mosaico). Son decorativos: `pointer-events: none`, contenido vacío (no aparecen en el árbol de accesibilidad) y fijos detrás de todo el contenido. El movimiento lento (solo `transform` y `opacity`) existe únicamente dentro de `@media (prefers-reduced-motion: no-preference)`. **El tema claro comparte este fondo y el encabezado con el oscuro (D21)**: mismas capas, mismas opacidades y mismas animaciones; solo los paneles (sidebar, barra superior, `main` y sus tarjetas, tablas y formularios) se aclaran. `--color-bg` (`#05060f`) no se redefine en el tema claro.
 - **Tipografía de la marca:** *Cinzel Decorative* (`fonts/CinzelDecorative-Bold.ttf`), cargada desde el archivo local con `@font-face` y `font-display: swap`. Licencia **SIL Open Font License 1.1**; el texto completo está en `fonts/OFL.txt`. Si la fuente no carga, el título cae en Georgia o una serif del sistema.
 - **Tapas de libro:** se dibujan con CSS (degradés); no hay imágenes de tapas (DD-12).
+- **Capturas de referencia (`docs/inspo/`):** `prototipo-inicio.png` y `prototipo-recomendados.png` son capturas del prototipo propio del equipo, usadas solo como referencia visual (no se cargan en la página). Las portadas de libros que se ven en ellas pertenecen a sus autores y editoriales y se usan con fines educativos. Detalle y créditos en [`docs/inspo/README.md`](docs/inspo/README.md).
 - **Íconos:** SVG en línea, escritos a mano en el HTML (decorativos, `aria-hidden="true"`). No hay librerías de íconos ni pedidos externos.
 - **Decisión sobre el parpadeo del tema:** el script se carga con `defer` (regla del proyecto: scripts clásicos con `defer`, sin `<script>` ni handlers en línea). Por eso `data-tema` se aplica recién cuando se ejecuta `js/app.js`, y quien eligió el tema claro puede ver un instante el tema oscuro (por defecto) al cargar o recargar la página. **Se acepta como contrapartida** frente a agregar un script en línea en el `<head>`, que rompería esa regla.
 
@@ -784,5 +786,7 @@ Pasada del 19/10/2026 en el navegador embebido de Cursor (Chromium). No se pudo 
 | `libreria.libros`, `libreria.clientes` y `libreria.ventas` en `[]`, recarga | En Catálogo se lee «Todavía no hay libros en el catálogo.» y `#catalogo-sin-resultados` sigue oculto. Al abrir Libros: «Todavía no hay libros cargados.». Al abrir Clientes: «Todavía no hay clientes cargados.». |
 | 1280 px, las 5 vistas | `document.documentElement.scrollWidth <= window.innerWidth` dio `true` en Catálogo, Libros, Clientes, Ventas e Historial. |
 | 320 px, listas vacías | Los tres mensajes de lista vacía se leen (tienen alto) y la página no gana scroll horizontal (`scrollWidth` 320). |
-| Teclado | Un Tab dejó el foco en `body` sin `:focus-visible`. Con el buscador enfocado, otro Tab no lo movió y `:focus-visible` siguió en `false`. El contorno de `:focus-visible` está en `css/styles.css` (`outline: 3px solid`). Esta pasada no recorrió las cinco vistas con Tab: no se marca aprobado. |
-| Consola | No se leyó el panel de consola. Al cambiar de vista no hubo una excepción. |
+| Teclado (pasada manual del 20/10/2026, Edge, `file://`) | Recorriendo las 5 vistas con Tab a 320 px y a 1280 px, el foco se ve siempre. Verificado por: el grupo. |
+| Consola (pasada manual del 20/10/2026, Edge, `file://`) | Durante el mismo recorrido, la consola no muestra errores. Verificado por: el grupo. |
+
+Las filas «Teclado» y «Consola» vienen de la pasada manual del 20/10/2026. La pasada anterior, con el navegador automático de Cursor, no podía recorrer la página con Tab (el foco no avanzaba), por eso esas dos filas no se dieron por aprobadas en ella.
